@@ -1,0 +1,19 @@
+[
+  {
+    "serviceName": "test",
+    "rules": [
+      {
+        "name": "xss",
+        "active": true
+      },
+      {
+        "name": "pan_process",
+        "active": true
+      },
+      {
+        "name": "sqli",
+        "active": true
+      }
+    ]
+  }
+]

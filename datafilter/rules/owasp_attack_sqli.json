@@ -1,0 +1,310 @@
+[
+  {
+    "name": "942110",
+    "disable" : false,
+    "rule": "(?:^\\s*[\\\"'`;]+|[\\\"'`]+\\s*$)",
+    "message": "SQL Injection Attack: Common Injection Testing Detected",
+    "sample": "var=''"
+  },
+  {
+    "name": "942120",
+    "disable" : false,
+    "rule": "(?i)(?:not\\s+between\\s+(?:(?:(?:'[^']*')|(?:\\\"[^\\\"]*\\\"))\\s+and\\s+(?:(?:'[^']*')|(?:\\\"[^\\\"]*\\\"))|0\\s+and)|(?:^|\\W)in[+\\s]*\\([\\s\\d\\\"]+[^()]*\\)|\\b(?:r(?:egexp|like)|isnull|xor)\\b|<(?:>(?:\\s+binary)?|=>?|<)|r(?:egexp|like)\\s+binary|(?:like|is)\\s+null|>[=>]|\\|\\||!=|&&)",
+    "message": "SQL Injection Attack: SQL Operator Detected",
+    "sample": "pay= in ( Aa,- Ab-, and Ac)"
+  },
+  {
+    "name": "942140",
+    "disable" : false,
+    "rule": "(?i)\\b(?:(?:m(?:s(?:ys(?:ac(?:cess(?:objects|storage|xml)|es)|(?:relationship|object|querie)s|modules2?)|db)|aster\\.\\.sysdatabases|ysql\\.db)|pg_(?:catalog|toast)|information_schema|northwind|tempdb)\\b|s(?:(?:ys(?:\\.database_name|aux)|qlite(?:_temp)?_master)\\b|chema(?:_name\\b|\\W*\\())|d(?:atabas|b_nam)e\\W*\\()",
+    "message": "SQL Injection Attack: Common DB Names Detected",
+    "sample": "DaTaBasE("
+  },
+  {
+    "name": "942150",
+    "disable" : false,
+    "rule": "(?i)\\b(?:c(?:o(?:n(?:v(?:ert(?:_tz)?)?|cat(?:_ws)?|nection_id)|(?:mpres)?s|ercibility|(?:un)?t|llation|alesce)|ur(?:rent_(?:time(?:stamp)?|date|user)|(?:dat|tim)e)|h(?:ar(?:(?:acter)?_length|set)?|r)|iel(?:ing)?|ast|r32)|s(?:u(?:b(?:str(?:ing(?:_index)?)?|(?:dat|tim)e)|m)|t(?:d(?:dev_(?:sam|po)p)?|r(?:_to_date|cmp))|e(?:c(?:_to_time|ond)|ssion_user)|ys(?:tem_user|date)|ha[12]?|oundex|chema|ig?n|leep|pace|qrt)|i(?:s(?:_(?:ipv(?:4(?:_(?:compat|mapped))?|6)|n(?:ot(?:_null)?|ull)|(?:free|used)_lock)|null)|n(?:et(?:6_(?:aton|ntoa)|_(?:aton|ntoa))|s(?:ert|tr)|terval)?|f(?:null)?)|d(?:a(?:t(?:e(?:_(?:format|add|sub)|diff)?|abase)|y(?:of(?:month|week|year)|name)?)|e(?:(?:s_(?:de|en)cryp|faul)t|grees|code)|count|ump)|l(?:o(?:ca(?:l(?:timestamp)?|te)|g(?:10|2)?|ad_file|wer)|ast(?:_(?:inser_id|day))?|e(?:(?:as|f)t|ngth)|case|trim|pad|n)|u(?:n(?:compress(?:ed_length)?|ix_timestamp|hex)|tc_(?:time(?:stamp)?|date)|p(?:datexml|per)|uid(?:_short)?|case|ser)|t(?:ime(?:_(?:format|to_sec)|stamp(?:diff|add)?|diff)?|o(?:(?:second|day)s|_base64|n?char)|r(?:uncate|im)|an)|m(?:a(?:ke(?:_set|date)|ster_pos_wait|x)|i(?:(?:crosecon)?d|n(?:ute)?)|o(?:nth(?:name)?|d)|d5)|r(?:e(?:p(?:lace|eat)|lease_lock|verse)|a(?:wtohex|dians|nd)|o(?:w_count|und)|ight|trim|pad)|f(?:i(?:eld(?:_in_set)?|nd_in_set)|rom_(?:unixtime|base64|days)|o(?:und_rows|rmat)|loor)|p(?:o(?:w(?:er)?|sition)|eriod_(?:diff|add)|rocedure_analyse|assword|g_sleep|i)|a(?:s(?:cii(?:str)?|in)|es_(?:de|en)crypt|dd(?:dat|tim)e|(?:co|b)s|tan2?|vg)|b(?:i(?:t_(?:length|count|x?or|and)|n(?:_to_num)?)|enchmark)|e(?:x(?:tract(?:value)?|p(?:ort_set)?)|nc(?:rypt|ode)|lt)|g(?:r(?:oup_conca|eates)t|et_(?:format|lock))|v(?:a(?:r(?:_(?:sam|po)p|iance)|lues)|ersion)|o(?:(?:ld_passwo)?rd|ct(?:et_length)?)|we(?:ek(?:ofyear|day)?|ight_string)|n(?:o(?:t_in|w)|ame_const|ullif)|h(?:ex(?:toraw)?|our)|qu(?:arter|ote)|year(?:week)?|xmltype)\\W*\\(",
+    "message": "SQL Injection Attack",
+    "sample": "var=test\\\"+(function(){if(typeof gs78r==='undefined'){var a=new Date();do{var b=new Date();}while(b-a<20000);gs78r=1;}}())+\\\""
+  },
+  {
+    "name": "942160",
+    "disable" : false,
+    "rule": "(?i:sleep\\(\\s*?\\d*?\\s*?\\)|benchmark\\(.*?\\,.*?\\))",
+    "message": "Detects blind sqli tests using sleep() or benchmark()",
+    "sample": "pay=BeNChMaRK(1000000, md5 AND 9796=4706('')"
+  },
+  {
+    "name": "942170",
+    "disable" : false,
+    "rule": "(?i)(?:select|;)\\s+(?:benchmark|sleep|if)\\s*?\\(\\s*?\\(?\\s*?\\w+",
+    "message": "Detects SQL benchmark and sleep injection attempts including conditional queries",
+    "sample": "var=SELECT BENCHMARK(1000000,1+1);"
+  },
+  {
+    "name": "942180",
+    "disable" : false,
+    "rule": "(?i)(?:[\\\"'`](?:\\s*?(?:(?:between|x?or|and|div)[\\w\\s-]+\\s*?[+<>=(),-]\\s*?[\\d\\\"'`]|like(?:[\\w\\s-]+\\s*?[+<>=(),-]\\s*?[\\d\\\"'`]|\\W+[\\w\\\"'`(])|[!=|](?:[\\d\\s!=+-]+.*?[\\\"'`(].*?|[\\d\\s!=]+.*?\\d+)$|[^\\w\\s]?=\\s*?[\\\"'`])|(?:\\W*?[+=]+\\W*?|[<>~]+)[\\\"'`])|(?:/\\*)+[\\\"'`]+\\s?(?:[#{]|\\/\\*|--)?|\\d[\\\"'`]\\s+[\\\"'`]\\s+\\d|where\\s[\\s\\w\\.,-]+\\s=|^admin\\s*?[\\\"'`]|\\sis\\s*?0\\W)",
+    "message": "Detects basic SQL authentication bypass attempts 1/3",
+    "sample": "javascript:\\\"/*'/*`/*--></noscript></title></textarea></style></template></noembed></script><html \\\""
+  },
+  {
+    "name": "942190",
+    "disable" : false,
+    "rule": "(?i)(?:\\b(?:(?:c(?:onnection_id|urrent_user)|database)\\s*?\\([^\\)]*?|u(?:nion(?:[\\w(\\s]*?select| select @)|ser\\s*?\\([^\\)]*?)|s(?:chema\\s*?\\([^\\)]*?|elect.*?\\w?user\\()|into[\\s+]+(?:dump|out)file\\s*?[\\\"'`]|from\\W+information_schema\\W|exec(?:ute)?\\s+master\\.)|[\\\"'`](?:;?\\s*?(?:union\\b\\s*?(?:(?:distin|sele)ct|all)|having|select)\\b\\s*?[^\\s]|\\s*?!\\s*?[\\\"'`\\w])|\\s*?exec(?:ute)?.*?\\Wxp_cmdshell|\\Wiif\\s*?\\()",
+    "message": "Detects MSSQL code execution and information gathering attempts",
+    "sample": "execution=e1s1&OlyH=9767 AND 1=1 UNION ALL SELECT 1,NULL,'<script>alert(\"XSS\")</script>',table_name FROM information_schema.tables WHERE 2>1--/**/; EXEC xp_cmdshell"
+  },
+  {
+    "name": "942200",
+    "disable" : false,
+    "rule": "(?i)(?:(?:(?:(?:trunc|cre|upd)at|renam)e|d(?:e(?:lete|sc)|rop)|(?:inser|selec)t|alter|load)\\s*?\\(\\s*?space\\s*?\\(|,.*?[)\\da-f\\\"'`][\\\"'`](?:[\\\"'`].*?[\\\"'`]|(?:\\r?\\n)?\\z|[^\\\"'`]+)|\\Wselect.+\\W*?from)",
+    "message": "Detects MySQL comment-/space-obfuscated injections and backtick termination",
+    "sample": ",varname\"=somedata"
+  },
+  {
+    "name": "942210",
+    "disable" : false,
+    "rule": "(?i)(?:(?:n(?:and|ot)|(?:x?x)?or|between|\\|\\||like|and|div|&&)[\\s(]+\\w+[\\s)]*?[!=+]+[\\s\\d]*?[\\\"'`=()]|\\d(?:\\s*?(?:between|like|x?or|and|div)\\s*?\\d+\\s*?[\\-+]|\\s+group\\s+by.+\\()|\\/\\w+;?\\s+(?:between|having|select|like|x?or|and|div)\\W|--\\s*?(?:(?:insert|update)\\s*?\\w{2,}|alter|drop)|#\\s*?(?:(?:insert|update)\\s*?\\w{2,}|alter|drop)|;\\s*?(?:(?:insert|update)\\s*?\\w{2,}|alter|drop)|@.+=\\s*?\\(\\s*?select|[^\\w]SET\\s*?@\\w+)",
+    "message": "Detects chained SQL injection attempts 1/2",
+    "sample": "pay=@example.com&name=(select"
+  },
+  {
+    "name": "942220",
+    "disable" : false,
+    "rule": "^(?i:-0000023456|4294967295|4294967296|2147483648|2147483647|0000012345|-2147483648|-2147483649|0000023456|2.2250738585072007e-308|2.2250738585072011e-308|1e309)$",
+    "message": "Looking for integer overflow attacks, these are taken from skipfish, except 2.2.2250738585072011e-308 is the \\\"magic number\\\" crash",
+    "sample": "/?string_to_convert= 4294967296"
+  },
+  {
+    "name": "942230",
+    "disable" : false,
+    "rule": "(?i)(?:select.*?having\\s*?[^\\s]+\\s*?[^\\w\\s]|[\\s()]case\\s+when.*?then|if\\s?\\(\\w+\\s*?[=<>~]|\\)\\s*?like\\s*?\\()",
+    "message": "Detects conditional SQL injection attempts",
+    "sample": "/?var= case when condition1 then result1"
+  },
+  {
+    "name": "942240",
+    "disable" : false,
+    "rule": "(?i)(?:[\\\"'`](?:;*?\\s*?waitfor\\s+(?:delay|time)\\s+[\\\"'`]|;.*?:\\s*?goto)|alter\\s*?\\w+.*?cha(?:racte)?r\\s+set\\s+\\w+)",
+    "message": "Detects MySQL charset switch and MSSQL DoS attempts",
+    "sample": "pay=ALTER TABLE `mass_mails` CHANGE `receivers` `receivers` ENUM('FACILITIES','APPLICATION_2015','APPLICATION_2016') CHARACTER SET utf8"
+  },
+  {
+    "name": "942250",
+    "disable" : false,
+    "rule": "(?i:merge.*?using\\s*?\\(|execute\\s*?immediate\\s*?[\\\"'`]|match\\s*?[\\w(),+-]+\\s*?against\\s*?\\()",
+    "message": "Detects MATCH AGAINST, MERGE and EXECUTE IMMEDIATE injections",
+    "sample": "/?var=EXECUTE IMMEDIATE \""
+  },
+  {
+    "name": "942251",
+    "disable" : false,
+    "rule": "(?i)\\W+\\d*?\\s*?\\bhaving\\b\\s*?[^\\s\\-]",
+    "message": "Detects HAVING injections",
+    "sample": "/?var= HAVING COUNT(CustomerID) > 5"
+  },
+  {
+    "name": "942260",
+    "disable" : true,
+    "rule": "(?i)(?:[\\\"'`]\\s*?(?:(?:n(?:and|ot)|(?:x?x)?or|between|\\|\\||and|div|&&)\\s+[\\s\\w]+=\\s*?\\w+\\s*?having\\s+|like(?:\\s+[\\s\\w]+=\\s*?\\w+\\s*?having\\s+|\\W*?[\\\"'`\\d])|[^?\\w\\s=.,;)(]+\\s*?[(@\\\"'`]*?\\s*?\\w+\\W+\\w|\\*\\s*?\\w+\\W+[\\\"'`])|(?:union\\s*?(?:distinct|[(!@]*?|all)?\\s*?[([]*?\\s*?select|select\\s+?[\\[\\]()\\s\\w\\.,\\\"'`-]+from)\\s+|\\w\\s+like\\s+[\\\"'`]|find_in_set\\s*?\\(|like\\s*?[\\\"'`]%)",
+    "message": "Detects basic SQL authentication bypass attempts 2/3",
+    "sample": ""
+  },
+  {
+    "name": "942270",
+    "disable" : false,
+    "rule": "(?i)union.*?select.*?from",
+    "message": "Looking for basic sql injection. Common attack string for mysql, oracle and others.",
+    "sample": "/?var=union select col from"
+  },
+  {
+    "name": "942280",
+    "disable" : false,
+    "rule": "(?i)(?:;\\s*?shutdown\\s*?(?:[#;{]|\\/\\*|--)|waitfor\\s*?delay\\s?[\\\"'`]+\\s?\\d|select\\s*?pg_sleep)",
+    "message": "Detects Postgres pg_sleep injection, waitfor delay attacks and database shutdown attempts\n",
+    "sample": "/?var=select pg_sleep"
+  },
+  {
+    "name": "942290",
+    "disable" : false,
+    "rule": "(?i:(?:\\[\\$(?:ne|eq|lte?|gte?|n?in|mod|all|size|exists|type|slice|x?or|div|like|between|and)\\]))",
+    "message": "Finds basic MongoDB SQL injection attempts",
+    "sample": "/mongo/show.php?u_id[$ne]=2"
+  },
+  {
+    "name": "942300",
+    "disable" : false,
+    "rule": "(?i)(?:\\b(?:(?:r(?:egexp|like)|n(?:and|ot)|(?:x?x)?or|like|and|div)\\s+\\s*?\\w+\\(|b(?:etween\\s+\\s*?\\w+\\(|inary\\s*?\\(\\s*?\\d)|cha?r\\s*?\\(\\s*?\\d)|\\)\\s*?when\\s*?\\d+\\s*?then|(?:\\|\\||&&)\\s+\\s*?\\w+\\(|[\\\"'`]\\s*?(?:[#{]|--)|\\/\\*!\\s?\\d+)",
+    "message": "Detects MySQL comments, conditions and ch(a)r injections",
+    "sample": "var=) when 234 then&foo=bar"
+  },
+  {
+    "name": "942310",
+    "disable" : false,
+    "rule": "(?i)(?:(?:\\(\\s*?select\\s*?\\w+|order\\s+by\\s+if\\w*?|coalesce)\\s*?\\(|[\\\"'`](?:;\\s*?(?:begin|while|if)|[\\s\\d]+=\\s*?\\d)|\\w[\\\"'`]\\s*?(?:(?:[-+=|@]+\\s+?)+|[-+=|@]+)[\\d(]|[\\s(]+case\\d*?\\W.+[tw]hen[\\s(]|\\+\\s*?\\d+\\s*?\\+\\s*?@|@@\\w+\\s*?[^\\w\\s]|\\W!+[\\\"'`]\\w|\\*\\/from)",
+    "message": "Detects chained SQL injection attempts 2/2",
+    "sample": "/?var=' and 1 in (select min(name) from sysobjects where xtype = 'U' and name > '.') --"
+  },
+  {
+    "name": "942320",
+    "disable" : false,
+    "rule": "(?i)(?:create\\s+(?:procedure|function)\\s*?\\w+\\s*?\\(\\s*?\\)\\s*?-|;\\s*?(?:declare|open)\\s+[\\w-]+|procedure\\s+analyse\\s*?\\(|declare[^\\w]+[@#]\\s*?\\w+|exec\\s*?\\(\\s*?@)",
+    "message": "Detects MySQL and PostgreSQL stored procedure/function injections",
+    "sample": "pay=DECLARE/**/@x"
+  },
+  {
+    "name": "942330",
+    "disable" : true,
+    "rule": "(?i)(?:^(?:[\\\"'`\\x5c]*?(?:[^\\\"'`]+[\\\"'`]|[\\d\\\"'`]+)\\s*?(?:n(?:and|ot)|(?:x?x)?or|between|\\|\\||like|and|div|&&)\\s*?[\\w\\\"'`][+&!@(),.-]|.?[\\\"'`]$)|@(?:[\\w-]+\\s(?:between|like|x?or|and|div)\\s*?[^\\w\\s]|\\w+\\s+(?:between|like|x?or|and|div)\\s*?[\\\"'`\\d]+)|[\\\"'`]\\s*?(?:between|like|x?or|and|div)\\s*?[\\\"'`]?\\d|[^\\w\\s:]\\s*?\\d\\W+[^\\w\\s]\\s*?[\\\"'`].|[^\\w\\s]\\w+\\s*?[|-]\\s*?[\\\"'`]\\s*?\\w|\\Winformation_schema|\\x5cx(?:23|27|3d)|table_name\\W)",
+    "message": "Detects classic SQL injection probings 1/3",
+    "sample": "var=\\\\x23"
+  },
+  {
+    "name": "942340",
+    "disable" : true,
+    "rule": "(?i)(?:[\\\"'`](?:\\s*?(?:is\\s*?(?:[\\d.]+\\s*?\\W.*?[\\\"'`]|\\d.+[\\\"'`]?\\w)|\\d\\s*?(?:--|#))|(?:\\W+[\\w+-]+\\s*?=\\s*?\\d\\W+|\\|?[\\w-]{3,}[^\\w\\s.,]+)[\\\"'`]|[\\%&<>^=]+\\d\\s*?(?:between|like|x?or|and|div|=))|(?i:n?and|x?x?or|div|like|between|not|\\|\\||\\&\\&)\\s+[\\s\\w+]+(?:sounds\\s+like\\s*?[\\\"'`]|regexp\\s*?\\(|[=\\d]+x)|in\\s*?\\(+\\s*?select)",
+    "message": "Detects basic SQL authentication bypass attempts 3/3",
+    "sample": "/?var=in ( select * from"
+  },
+  {
+    "name": "942350",
+    "disable" : false,
+    "rule": "(?i)(?:;\\s*?(?:(?:(?:trunc|cre|upd)at|renam)e|d(?:e(?:lete|sc)|rop)|(?:inser|selec)t|alter|load)\\b\\s*?[\\[(]?\\w{2,}|create\\s+function\\s.+\\sreturns)",
+    "message": "Detects MySQL UDF injection and other data/structure manipulation attempts",
+    "sample": "/?var=CREATE FUNCTION hello (s CHAR(20)) RETURNS CHAR(50) DETERMINISTIC RETURN CONCAT('Hello, ',s,'!');"
+  },
+  {
+    "name": "942360",
+    "disable" : false,
+    "rule": "(?i)(?:^[\\W\\d]+\\s*?(?:alter\\s*(?:a(?:(?:pplication\\s*rol|ggregat)e|s(?:ymmetric\\s*ke|sembl)y|u(?:thorization|dit)|vailability\\s*group)|c(?:r(?:yptographic\\s*provider|edential)|o(?:l(?:latio|um)|nversio)n|ertificate|luster)|s(?:e(?:rv(?:ice|er)|curity|quence|ssion|arch)|y(?:mmetric\\s*key|nonym)|togroup|chema)|m(?:a(?:s(?:ter\\s*key|k)|terialized)|e(?:ssage\\s*type|thod)|odule)|l(?:o(?:g(?:file\\s*group|in)|ckdown)|a(?:ngua|r)ge|ibrary)|t(?:(?:abl(?:espac)?|yp)e|r(?:igger|usted)|hreshold|ext)|p(?:a(?:rtition|ckage)|ro(?:cedur|fil)e|ermission)|d(?:i(?:mension|skgroup)|atabase|efault|omain)|r(?:o(?:l(?:lback|e)|ute)|e(?:sourc|mot)e)|f(?:u(?:lltext|nction)|lashback|oreign)|e(?:xte(?:nsion|rnal)|(?:ndpoi|ve)nt)|in(?:dex(?:type)?|memory|stance)|b(?:roker\\s*priority|ufferpool)|x(?:ml\\s*schema|srobject)|w(?:ork(?:load)?|rapper)|hi(?:erarchy|stogram)|o(?:perator|utline)|(?:nicknam|queu)e|us(?:age|er)|group|java|view)\\b|(?:(?:(?:trunc|cre)at|renam)e|d(?:e(?:lete|sc)|rop)|(?:inser|selec)t|load)\\s+\\w+|u(?:nion\\s*(?:(?:distin|sele)ct|all)\\b|pdate\\s+\\w+))|\\b(?:(?:(?:(?:trunc|cre|upd)at|renam)e|(?:inser|selec)t|de(?:lete|sc)|alter|load)\\s+(?:group_concat|load_file|char)\\b\\s*\\(?|end\\s*?\\);)|[\\\"'`\\w]\\s+as\\b\\s*[\\\"'`\\w]+\\s*\\bfrom|[\\s(]load_file\\s*?\\(|[\\\"'`]\\s+regexp\\W)",
+    "message": "Detects concatenated basic SQL injection and SQLLFI attempts",
+    "sample": "var=1234 AS \"foobar\" FROM tablevar2=whatever"
+  },
+  {
+    "name": "942361",
+    "disable" : false,
+    "rule": "(?i:^[\\W\\d]+\\s*?(?:alter|union)\\b)",
+    "message": "Detects basic SQL injection based on keyword alter or union",
+    "sample": "\\\" ALTER A"
+  },
+  {
+    "name": "942370",
+    "disable" : true,
+    "rule": "(?i)(?:[\\\"'`](?:\\s*?(?:(?:\\*.+(?:(?:an|i)d|between|like|x?or|div)\\W*?[\\\"'`]|(?:between|like|x?or|and|div)\\s[^\\d]+[\\w-]+.*?)\\d|[^\\w\\s?]+\\s*?[^\\w\\s]+\\s*?[\\\"'`]|[^\\w\\s]+\\s*?[\\W\\d].*?(?:--|#))|.*?\\*\\s*?\\d)|[()\\*<>%+-][\\w-]+[^\\w\\s]+[\\\"'`][^,]|\\^[\\\"'`])",
+    "message": "Detects classic SQL injection probings 2/3",
+    "sample": "var=\\\"` * 12344"
+  },
+  {
+    "name": "942380",
+    "disable" : false,
+    "rule": "(?i)(?:\\b(?:having\\b(?: ?(?:[\\'\\\"][^=]{1,10}[\\'\\\" ?[=<>]+|\\d{1,10} ?[=<>]+)|\\s+(?:'[^=]{1,10}'|\\d{1,10})\\s*?[=<>])|ex(?:ecute(?:\\s{1,5}[\\w\\.$]{1,5}\\s{0,3}|\\()|ists\\s*?\\(\\s*?select\\b)|(?:create\\s+?table.{0,20}?|like\\W*?char\\W*?)\\()|exists\\s(?:s(?:elect\\S(?:if(?:null)?\\s\\(|concat|top)|ystem\\s\\()|\\bhaving\\b\\s+\\d{1,10}|'[^=]{1,10}'|\\sselect)|select.*?case|from.*?limit|order\\sby)",
+    "message": "SQL Injection Attack",
+    "sample": "from(select count(*),concat((select (select (select concat(0x53,0x65,0x61,0x72,0x63,0x68,0x43,0x6F,0x6C,0x6C,0x65,0x63,0x74,0x6F,0x72) from `information_schema`.tables limit"
+  },
+  {
+    "name": "942390",
+    "disable" : false,
+    "rule": "(?:\\b(?:(?i:xor)\\b\\s+(?:'[^=]{1,10}'(?:\\s*?[=<>])?|\\d{1,10}(?:\\s*?[=<>])?)|(?i:or)\\b\\s+(?:'[^=]{1,10}'(?:\\s*?[=<>])?|\\d{1,10}(?:\\s*?[=<>])?))|(?i:\\bor\\b ?[\\'\\\"][^=]{1,10}[\\'\\\"] ?[=<>]+)|(?i:'\\s+xor\\s+.{1,20}[+\\-!<>=])|(?i:'\\s+or\\s+.{1,20}[+\\-!<>=])|(?i:\\bor\\b ?\\d{1,10} ?[=<>]+))",
+    "message": "SQL Injection Attack",
+    "sample": "/?var=sdfsd'or 1 > 1"
+  },
+  {
+    "name": "942400",
+    "disable" : false,
+    "rule": "(?i)\\band\\b(?: ?(?:[\\'\\\"][^=]{1,10}[\\'\\\"]|\\d{1,10}) ?[=<>]+|\\s+(?:\\d{1,10}\\s*?[=<>]|'[^=]{1,10}'))",
+    "message": "SQL Injection Attack",
+    "sample": "and '5'orig_var_datavarname=whatever"
+  },
+  {
+    "name": "942410",
+    "disable" : false,
+    "rule": "(?i)\\b(?:c(?:o(?:n(?:v(?:ert(?:_tz)?)?|cat(?:_ws)?|nection_id)|(?:mpres)?s|ercibility|(?:un)?t|alesce)|ur(?:rent_(?:time(?:stamp)?|date|user)|(?:dat|tim)e)|h(?:ar(?:(?:acter)?_length|set)?|r)|iel(?:ing)?|ast|r32)|s(?:t(?:d(?:dev(?:_(?:sam|po)p)?)?|r(?:_to_date|cmp))|u(?:b(?:str(?:ing(?:_index)?)?|(?:dat|tim)e)|m)|e(?:c(?:_to_time|ond)|ssion_user)|ys(?:tem_user|date)|ha[12]?|oundex|chema|ig?n|leep|pace|qrt)|i(?:s(?:_(?:ipv(?:4(?:_(?:compat|mapped))?|6)|n(?:ot(?:_null)?|ull)|(?:free|used)_lock)|null)?|n(?:et(?:6_(?:aton|ntoa)|_(?:aton|ntoa))|s(?:ert|tr)|terval)?|f(?:null)?)|d(?:a(?:t(?:e(?:_(?:format|add|sub)|diff)?|abase)|y(?:of(?:month|week|year)|name)?)|e(?:(?:s_(?:de|en)cryp|faul)t|grees|code)|count|ump)|l(?:o(?:ca(?:l(?:timestamp)?|te)|g(?:10|2)?|ad_file|wer)|ast(?:_(?:insert_id|day))?|e(?:(?:as|f)t|ngth)|case|trim|pad|n)|u(?:n(?:compress(?:ed_length)?|ix_timestamp|hex)|tc_(?:time(?:stamp)?|date)|p(?:datexml|per)|uid(?:_short)?|case|ser)|r(?:a(?:wto(?:nhex(?:toraw)?|hex)|dians|nd)|e(?:p(?:lace|eat)|lease_lock|verse)|o(?:w_count|und)|ight|trim|pad)|t(?:ime(?:_(?:format|to_sec)|stamp(?:diff|add)?|diff)?|o_(?:(?:second|day)s|base64|n?char)|r(?:uncate|im)|an)|m(?:a(?:ke(?:_set|date)|ster_pos_wait|x)|i(?:(?:crosecon)?d|n(?:ute)?)|o(?:nth(?:name)?|d)|d5)|f(?:i(?:eld(?:_in_set)?|nd_in_set)|rom_(?:unixtime|base64|days)|o(?:und_rows|rmat)|loor)|p(?:o(?:w(?:er)?|sition)|eriod_(?:diff|add)|rocedure_analyse|assword|g_sleep|i)|a(?:s(?:cii(?:str)?|in)|es_(?:de|en)crypt|dd(?:dat|tim)e|(?:co|b)s|tan2?|vg)|b(?:i(?:t_(?:length|count|x?or|and)|n(?:_to_num)?)|enchmark)|e(?:x(?:tract(?:value)?|p(?:ort_set)?)|nc(?:rypt|ode)|lt)|g(?:r(?:oup_conca|eates)t|et_(?:format|lock))|v(?:a(?:r(?:_(?:sam|po)p|iance)|lues)|ersion)|o(?:(?:ld_passwo)?rd|ct(?:et_length)?)|we(?:ek(?:ofyear|day)?|ight_string)|n(?:o(?:t_in|w)|ame_const|ullif)|h(?:ex(?:toraw)?|our)|qu(?:arter|ote)|year(?:week)?|xmltype)\\W*?\\(",
+    "message": "SQL Injection Attack",
+    "sample": "BENChmARk("
+  },
+  {
+    "name": "942420",
+    "disable" : true,
+    "rule": "((?:[~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>][^~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>]*?){8})",
+    "message": "Restricted SQL Character Anomaly Detection (cookies): # of special characters exceeded (8)",
+    "sample": "ar=%7e%7e%7e%7e%7e%7e%7e%7e%7e&foo=var"
+  },
+  {
+    "name": "942421",
+    "disable" : true,
+    "rule": "((?:[~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>][^~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>]*?){3})",
+    "message": "Restricted SQL Character Anomaly Detection (cookies): # of special characters exceeded (3)",
+    "sample": "cookie=@@@@@@@@@@@@@"
+  },
+  {
+    "name": "942430",
+    "disable" : true,
+    "rule": "((?:[~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>][^~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>]*?){12})",
+    "message": "Restricted SQL Character Anomaly Detection (args): # of special characters exceeded (12)",
+    "sample": "var=(((((())))))&var2=whatever"
+  },
+  {
+    "name": "942431",
+    "disable" : true,
+    "rule": "((?:[~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>][^~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>]*?){6})",
+    "message": "Restricted SQL Character Anomaly Detection (args): # of special characters exceeded (6)",
+    "sample": "var=-------------------&var2=whatever"
+  },
+  {
+    "name": "942432",
+    "disable" : true,
+    "rule": "((?:[~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>][^~!@#\\$%\\^&\\*\\(\\)\\-\\+=\\{\\}\\[\\]\\|:;\\\"'´’‘`<>]*?){2})",
+    "message": "Restricted SQL Character Anomaly Detection (args): # of special characters exceeded (2)",
+    "sample": "var=;;dd foo bar"
+  },
+  {
+    "name": "942440",
+    "disable" : false,
+    "rule": " (?:--(?:[\\s\\r\\n\\v\\f]|[^-]*?-)|[^&-]#.*?[\\s\\r\\n\\v\\f]|;?\\x00|[';]--|\\/\\*!?|\\*\\/)",
+    "message": "SQL Comment Sequence Detected",
+    "sample": ""
+  },
+  {
+    "name": "942450",
+    "disable" : false,
+    "rule": " (?i:\\b0x[a-f\\d]{3,})",
+    "message": "SQL Hex Encoding Identified",
+    "sample": "var=select 0x616263"
+  },
+  {
+    "name": "942460",
+    "disable" : true,
+    "rule": "\\W{4}",
+    "message": "Meta-Character Anomaly Detection Alert - Repetitive Non-Word Characters",
+    "sample": "var=foo...."
+  },
+  {
+    "name": "942470",
+    "disable" : false,
+    "rule": "(?i)(?:xp_(?:reg(?:re(?:movemultistring|ad)|delete(?:value|key)|enum(?:value|key)s|addmultistring|write)|(?:servicecontro|cmdshel)l|e(?:xecresultset|numdsn)|ntsec(?:_enumdomains)?|terminate(?:_process)?|availablemedia|loginconfig|filelist|dirtree|makecab)|s(?:p_(?:(?:addextendedpro|sqlexe)c|p(?:assword|repare)|replwritetovarbin|is_srvrolemember|execute(?:sql)?|makewebtask|oacreate|help)|ql_(?:longvarchar|variant))|open(?:owa_util|rowset|query)|(?:n?varcha|tbcreato)r|autonomous_transaction|db(?:a_users|ms_java)|utl_(?:file|http))",
+    "message": "SQL Injection Attack",
+    "sample": "ppay=sp_executesql"
+  },
+  {
+    "name": "942480",
+    "disable" : false,
+    "rule": "(?i)(?:\\b(?:(?:s(?:elect\\b.{1,100}?\\b(?:(?:(?:length|count)\\b.{1,100}?|.*?\\bdump\\b.*)\\bfrom|to(?:p\\b.{1,100}?\\bfrom|_(?:numbe|cha)r)|(?:from\\b.{1,100}?\\bwher|data_typ)e|instr)|ys_context)|in(?:to\\b\\W*?\\b(?:dump|out)file|sert\\b\\W*?\\binto|ner\\b\\W*?\\bjoin)|u(?:nion\\b.{1,100}?\\bselect|tl_inaddr)|group\\b.*?\\bby\\b.{1,100}?\\bhaving|d(?:elete\\b\\W*?\\bfrom|bms_\\w+\\.)|load\\b\\W*?\\bdata\\b.*?\\binfile)\\b|print\\b\\W*?\\@\\@)|(?:;\\W*?\\b(?:shutdown|drop)|collation\\W*?\\(a|\\@\\@version)\\b|'(?:s(?:qloledb|a)|msdasql|dbo)')",
+    "message": "SQL Injection Attack",
+    "sample": "/?'msdasql'"
+  },
+  {
+    "name": "942490",
+    "disable" : true,
+    "rule": "[\\\"'`][\\s\\d]*?[^\\w\\s]\\W*?\\d\\W*?.*?[\\\"'`\\d]",
+    "message": "Detects classic SQL injection probings 3/3",
+    "sample": "pay='][0]]), strtolower($b[$GLOBALS['\n"
+  },
+  {
+    "name": "942500",
+    "disable" : false,
+    "rule": "(?i:\\/\\*[!+](?:[\\w\\s=_\\-()]+)?\\*\\/)",
+    "message": "MySQL in-line comment detected",
+    "sample": "/?id=9999+or+{if+length((/*!5000select+username/*!50000from*/user+where+id=1))>0}"
+  }
+]
