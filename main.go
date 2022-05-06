@@ -24,5 +24,5 @@ func main() {
 	//data := "http://testing.com/book.html?default=<script>alert(document.cookie)</script>"
 	//data := "44044333322221111deded AND 1=1 --ede4444333322221111dededede44044333322221111dededede4442333322221111dededede"
 
-	datafilter.Execute(data, serviceName)
+	datafilter.Execute(data, serviceName, config.Request)
 }

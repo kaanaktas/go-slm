@@ -1,6 +1,7 @@
 package datafilter
 
 import (
+	"github.com/kaanaktas/go-slm/config"
 	"testing"
 )
 
@@ -53,7 +54,7 @@ func TestExecute(t *testing.T) {
 					t.Errorf("%s didn't panic", tt.name)
 				}
 			}()
-			Execute(tt.args.data, tt.args.serviceName)
+			Execute(tt.args.data, tt.args.serviceName, config.Request)
 		})
 	}
 }

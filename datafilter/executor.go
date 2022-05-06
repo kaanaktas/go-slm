@@ -2,23 +2,24 @@ package datafilter
 
 import (
 	"fmt"
-	"github.com/kaanaktas/go-slm/access"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
+	"github.com/kaanaktas/go-slm/policy"
 	"log"
 	"sync"
 )
 
 var cacheIn = cache.NewInMemory()
 
-func Execute(data, serviceName string) {
+func Execute(data, serviceName, direction string) {
+	policyKey := config.PolicyKey(serviceName, direction)
 	cachedRule, ok := cacheIn.Get(access.Key)
 	if !ok {
-		panic("accessRule doesn't exist")
+		panic("policyRule doesn't exist")
 	}
 
-	accessMap := cachedRule.(access.RuleSet)[serviceName]
-	if len(accessMap) == 0 {
+	policyRules := cachedRule.(access.PolicyRules)[policyKey]
+	if len(policyRules) == 0 {
 		log.Println("No ruleSet found for", serviceName)
 		return
 	}
@@ -27,7 +28,7 @@ func Execute(data, serviceName string) {
 	in := make(chan validate)
 	closeCh := make(chan struct{})
 
-	go processor(accessMap, in, breaker)
+	go processor(policyRules, in, breaker)
 	go validator(&data, in, closeCh, breaker)
 
 	select {

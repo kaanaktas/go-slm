@@ -1,0 +1,30 @@
+{
+  "rules": [
+    {
+      "Name": "combined_rule",
+      "rule": [
+        {
+          "name": "xss",
+          "active": true
+        },
+        {
+          "name": "pan_process",
+          "active": true
+        },
+        {
+          "name": "sqli",
+          "active": true
+        }
+      ]
+    },
+    {
+      "Name": "pan_only_rule",
+      "rule": [
+        {
+          "name": "pan_process",
+          "active": true
+        }
+      ]
+    }
+  ]
+}

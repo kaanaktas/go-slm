@@ -1,0 +1,14 @@
+{
+  "policies": [
+    {
+      "serviceName": "test",
+      "request": "combined_rule",
+      "response": "pan_only_rule"
+    },
+    {
+      "serviceName": "test2",
+      "request": "combined_rule",
+      "response": "combined_rule"
+    }
+  ]
+}

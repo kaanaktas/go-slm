@@ -24,3 +24,14 @@ func Elapsed(msg string) func() {
 		log.Printf("%s took %v\n", msg, time.Since(start))
 	}
 }
+
+// PolicyKey policy key to return rules from policy rule set
+func PolicyKey(serviceName, direction string) string {
+	return serviceName + "_" + direction
+}
+
+//policy rule set directions
+const (
+	Request  = "request"
+	Response = "response"
+)
