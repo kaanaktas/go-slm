@@ -6,15 +6,15 @@ type owasp struct {
 	pattern
 }
 
-func (o owasp) validate(data *string) bool {
+func (o owasp) Validate(data *string) bool {
 	matched, _ := regexp.MatchString(o.Rule, *data)
 	return matched
 }
 
-func (o owasp) toString() string {
+func (o owasp) ToString() string {
 	return o.Name + " " + o.Message
 }
 
-func (o owasp) disable() bool {
-	return o.Disable
+func (o owasp) Disable() bool {
+	return o.IsDisabled
 }

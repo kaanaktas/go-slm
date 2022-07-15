@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/kaanaktas/go-slm/config"
-	"github.com/kaanaktas/go-slm/datafilter"
+	"github.com/kaanaktas/go-slm/executor"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"io/ioutil"
@@ -40,7 +40,7 @@ func testPost(c echo.Context) error {
 
 func testGet(c echo.Context) error {
 	p1 := c.QueryParam("param1")
-	datafilter.Execute(p1, "test", config.Request)
+	executor.Execute(p1, "test", config.Request)
 	return c.JSON(http.StatusOK, "no_match")
 }
 

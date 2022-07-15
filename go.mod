@@ -3,6 +3,7 @@ module github.com/kaanaktas/go-slm
 go 1.18
 
 require (
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 )

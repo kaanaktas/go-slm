@@ -1,9 +1,20 @@
-package datafilter
+package main
 
 import (
+	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
+	"github.com/kaanaktas/go-slm/executor"
+	"os"
 	"testing"
 )
+
+func TestMain(m *testing.M) {
+	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/policy/testdata/policy_rule_set.json")
+	_ = os.Setenv("GO_SLM_COMMON_RULES_PATH", "/policy/testdata/common_rules.json")
+	_ = os.Setenv("GO_SLM_CURRENT_MODULE_NAME", "github.com/kaanaktas/dummy")
+
+	os.Exit(m.Run())
+}
 
 func TestExecute(t *testing.T) {
 	type args struct {
@@ -54,7 +65,22 @@ func TestExecute(t *testing.T) {
 					t.Errorf("%s didn't panic", tt.name)
 				}
 			}()
-			Execute(tt.args.data, tt.args.serviceName, config.Request)
+			executor.Execute(tt.args.data, tt.args.serviceName, config.Request)
 		})
+	}
+}
+
+func TestCache(t *testing.T) {
+	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/datafilter/testdata/datafilter_rule_set.json")
+
+	cacheIn := cache.NewInMemory()
+	cacheIn.Flush()
+
+	executor.Execute("test_sqli_filter", "test", config.Request)
+	if _, ok := cacheIn.Get("test_pan_process"); !ok {
+		t.Error("test_pan_process is not in the cache")
+	}
+	if _, ok := cacheIn.Get("pan_process"); !ok {
+		t.Error("pan_process is not in the cache")
 	}
 }

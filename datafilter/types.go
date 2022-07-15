@@ -1,9 +1,9 @@
 package datafilter
 
-type validate interface {
-	validate(data *string) bool
-	toString() string
-	disable() bool
+type Validate interface {
+	Validate(data *string) bool
+	ToString() string
+	Disable() bool
 }
 
 //filter types
@@ -13,9 +13,9 @@ const (
 )
 
 type pattern struct {
-	Name    string `json:"name"`
-	Rule    string `json:"rule"`
-	Sample  string `json:"sample"`
-	Message string `json:"message"`
-	Disable bool   `json:"disable"`
+	Name       string `json:"name"`
+	Rule       string `json:"rule"`
+	Sample     string `json:"sample"`
+	Message    string `json:"message"`
+	IsDisabled bool   `json:"disable"`
 }

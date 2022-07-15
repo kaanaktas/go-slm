@@ -6,7 +6,7 @@ type pan struct {
 	pattern
 }
 
-func (p pan) validate(data *string) bool {
+func (p pan) Validate(data *string) bool {
 	r := regexp.MustCompile(p.Rule)
 	matchList := r.FindAllString(*data, -1)
 	for _, v := range matchList {
@@ -18,10 +18,10 @@ func (p pan) validate(data *string) bool {
 	return false
 }
 
-func (p pan) toString() string {
+func (p pan) ToString() string {
 	return p.Name + " " + p.Message
 }
 
-func (p pan) disable() bool {
-	return p.Disable
+func (p pan) Disable() bool {
+	return p.IsDisabled
 }

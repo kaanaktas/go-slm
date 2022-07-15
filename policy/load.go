@@ -1,32 +1,30 @@
-package access
+package policy
 
 import (
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
 	"log"
+	"path/filepath"
 )
 
 const Key = "access_rule"
 
-func init() {
-	loadAccesses()
-}
+var cacheIn = cache.NewInMemory()
 
-type Rule struct {
+type CommonRule struct {
 	Name   string `json:"name"`
 	Active bool   `json:"active"`
 }
 
-type Rules struct {
-	Name  string `json:"Name"`
-	Rules []Rule `json:"rule"`
+type CommonRules struct {
+	Name  string       `json:"Name"`
+	Rules []CommonRule `json:"rule"`
 }
 
-type RuleSet struct {
-	Rules []Rules `json:"Rules"`
+type CommonRuleSet struct {
+	Rules []CommonRules `json:"Rules"`
 }
 
 type Policy struct {
@@ -39,32 +37,44 @@ type Policies struct {
 	Policies []Policy `json:"policies"`
 }
 
-type PolicyRules map[string][]Rule
+type Rules map[string][]CommonRule
 
-var cacheIn = cache.NewInMemory()
+func Load(policyRuleSetPath, commonRulesPath string) {
+	if policyRuleSetPath == "" {
+		panic("POLICY_RULE_SET_PATH hasn't been set")
+	}
 
-//go:embed policy_rule_set.json
-var policyRuleSetContent []byte
+	if commonRulesPath == "" {
+		panic("COMMON_RULES_PATH hasn't been set")
+	}
 
-//go:embed common_rules.json
-var commonRulesContent []byte
-
-func loadAccesses() {
 	var ps Policies
-	err := json.Unmarshal(policyRuleSetContent, &ps)
+	content, err := config.ReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
 	if err != nil {
-		msg := fmt.Sprintf("Can't unmarshall the content of policy_rule_set.json. Error: %s", err)
+		msg := fmt.Sprintf("Error while reading %s. Error: %s", policyRuleSetPath, err)
 		panic(msg)
 	}
 
-	var rules RuleSet
-	err = json.Unmarshal(commonRulesContent, &rules)
+	err = json.Unmarshal(content, &ps)
 	if err != nil {
-		msg := fmt.Sprintf("Can't unmarshall the content of policy_rule_set.json. Error: %s", err)
+		msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", policyRuleSetPath, err)
 		panic(msg)
 	}
 
-	policyRules := make(PolicyRules)
+	var rules CommonRuleSet
+	content, err = config.ReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
+	if err != nil {
+		msg := fmt.Sprintf("Error while reading %s. Error: %s", commonRulesPath, err)
+		panic(msg)
+	}
+
+	err = json.Unmarshal(content, &rules)
+	if err != nil {
+		msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", commonRulesPath, err)
+		panic(msg)
+	}
+
+	policyRules := make(Rules)
 
 	for _, policy := range ps.Policies {
 		for _, rule := range rules.Rules {
@@ -78,5 +88,5 @@ func loadAccesses() {
 	}
 
 	_ = cacheIn.Set(Key, policyRules, cache.NoExpiration)
-	log.Println("policy Rules have been loaded successfully")
+	log.Println("policy CommonRules have been loaded successfully")
 }

@@ -2,16 +2,13 @@ package datafilter
 
 import (
 	"embed"
-	_ "embed"
 	"encoding/json"
 	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
+	"github.com/kaanaktas/go-slm/config"
 	"log"
+	"path/filepath"
 )
-
-func init() {
-	loadRules()
-}
 
 type ruleSet struct {
 	Type  string  `json:"type"`
@@ -23,18 +20,69 @@ type rules struct {
 	Path string `json:"path"`
 }
 
+var cacheIn = cache.NewInMemory()
+
 //go:embed datafilter_rule_set.json
 var dataFilterRuleSet []byte
 
 //go:embed rules/*
 var ruleFs embed.FS
 
-func loadRules() {
-	var ruleSet []ruleSet
+func indexOfRuleSet(ruleSet []ruleSet, ruleType string) int {
+	for i, set := range ruleSet {
+		if ruleType == set.Type {
+			return i
+		}
+	}
+	return -1
+}
+
+func indexOfRule(rules []rules, ruleName string) int {
+	for i, rule := range rules {
+		if ruleName == rule.Name {
+			return i
+		}
+	}
+	return -1
+}
+
+func Load(dataFilterRuleSetPath string) {
+	var ruleSet, customRuleSet []ruleSet
 	err := json.Unmarshal(dataFilterRuleSet, &ruleSet)
 	if err != nil {
 		msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.json. Error: %s", err)
 		panic(msg)
+	}
+
+	if dataFilterRuleSetPath != "" {
+		content, err := config.ReadFile(filepath.Join(config.RootDirectory, dataFilterRuleSetPath))
+		if err != nil {
+			msg := fmt.Sprintf("Error while reading %s. Error: %s", dataFilterRuleSetPath, err)
+			panic(msg)
+		}
+		err = json.Unmarshal(content, &customRuleSet)
+		if err != nil {
+			msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.json. Error: %s", err)
+			panic(msg)
+		}
+
+		for i := 0; i < len(customRuleSet); i++ {
+			ruleType := customRuleSet[i].Type
+			rsIndex := indexOfRuleSet(ruleSet, ruleType)
+			if rsIndex == -1 {
+				ruleSet = append(ruleSet, customRuleSet[i])
+			} else {
+				customRules := customRuleSet[i].Rules
+				for k := 0; k < len(customRules); k++ {
+					index := indexOfRule(ruleSet[rsIndex].Rules, customRules[k].Name)
+					if index == -1 {
+						ruleSet[rsIndex].Rules = append(ruleSet[rsIndex].Rules, customRules[k])
+					} else {
+						(ruleSet[rsIndex]).Rules[index].Path = customRules[k].Path
+					}
+				}
+			}
+		}
 	}
 
 	for _, set := range ruleSet {
@@ -51,7 +99,7 @@ func loadRules() {
 				panic(msg)
 			}
 
-			validateRule := make([]validate, len(patterns))
+			validateRule := make([]Validate, len(patterns))
 			switch set.Type {
 			case PAN:
 				for i, v := range patterns {

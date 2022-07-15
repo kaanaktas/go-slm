@@ -19,6 +19,10 @@ func (i *inMemory) Set(k string, v interface{}, d time.Duration) error {
 	return nil
 }
 
+func (i *inMemory) Flush() {
+	i.cache.Flush()
+}
+
 var onceInMem sync.Once
 
 func (i *inMemory) initiateInMemory() {

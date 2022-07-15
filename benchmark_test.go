@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/kaanaktas/go-slm/config"
-	"github.com/kaanaktas/go-slm/datafilter"
+	"github.com/kaanaktas/go-slm/executor"
 	"io/ioutil"
 	"log"
 	"testing"
@@ -25,6 +25,6 @@ func Benchmark(b *testing.B) {
 	serviceName := "test"
 
 	for i := 0; i < b.N; i++ {
-		datafilter.Execute(data, serviceName)
+		executor.Execute(data, serviceName, config.Request)
 	}
 }

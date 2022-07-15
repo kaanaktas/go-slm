@@ -7,9 +7,9 @@ import (
 type Cache interface {
 	Get(k string) (interface{}, bool)
 	Set(k string, v interface{}, d time.Duration) error
+	Flush()
 }
 
 const (
-	NoExpiration      time.Duration = -1
-	DefaultExpiration time.Duration = 0
+	NoExpiration time.Duration = -1
 )

@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"github.com/kaanaktas/go-slm/config"
-	"github.com/kaanaktas/go-slm/datafilter"
+	"github.com/kaanaktas/go-slm/executor"
 	"github.com/labstack/echo/v4"
 	"io/ioutil"
 	"net/http"
@@ -22,7 +22,7 @@ func requestDump(s ServiceIdExtractor) echo.MiddlewareFunc {
 			c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
 
 			serviceName := s(c)
-			datafilter.Execute(string(reqBody), serviceName, config.Request)
+			executor.Execute(string(reqBody), serviceName, config.Request)
 
 			return next(c)
 		}
@@ -35,7 +35,7 @@ func extractServiceId(c echo.Context) string {
 }
 
 func responseBeforeHook(respBody string, c echo.Context, s ServiceIdExtractor) {
-	datafilter.Execute(respBody, s(c), config.Response)
+	executor.Execute(respBody, s(c), config.Response)
 }
 
 func customRecover(next echo.HandlerFunc) echo.HandlerFunc {
