@@ -9,8 +9,9 @@ import (
 )
 
 func init() {
-	_ = os.Setenv("GO_SLM_COMMON_RULES_PATH", "/policy/testdata/common_rules.json")
+	_ = os.Setenv("GO_SLM_COMMON_RULES_PATH", "/policy/testdata/common_policy_rules.json")
 	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/policy/testdata/policy_rule_set.json")
+	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/testdata/datafilter_rule_set.json")
 	//pretending to be imported by another project
 	_ = os.Setenv("GO_SLM_CURRENT_MODULE_NAME", "github.com/kaanaktas/dummy")
 }
