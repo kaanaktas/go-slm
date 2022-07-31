@@ -15,7 +15,7 @@ var cacheIn = cache.NewInMemory()
 
 type Specification struct {
 	PolicyRuleSetPath     string `envconfig:"policy_rule_set_path"`
-	CommonRulesPath       string `envconfig:"common_rules_path"`
+	CommonRulesPath       string `envconfig:"common_policies_path"`
 	DataFilterRuleSetPath string `envconfig:"data_filter_rule_set_path"`
 	CurrentModuleName     string `envconfig:"current_module_name"`
 }
@@ -49,8 +49,8 @@ func Execute(data, serviceName, direction string) {
 		panic("policyRule doesn't exist")
 	}
 
-	policyRules := cachedRule.(policy.Rules)[policyKey]
-	if len(policyRules) == 0 {
+	policies := cachedRule.(policy.CommonPolicyMap)[policyKey]
+	if len(policies) == 0 {
 		log.Println("No ruleSet found for", serviceName)
 		return
 	}
@@ -59,7 +59,7 @@ func Execute(data, serviceName, direction string) {
 	in := make(chan datafilter.Validate)
 	closeCh := make(chan struct{})
 
-	go processor(policyRules, in, breaker)
+	go processor(policies, in, breaker)
 	go validator(&data, in, closeCh, breaker)
 
 	select {
@@ -71,12 +71,12 @@ func Execute(data, serviceName, direction string) {
 	log.Println("no_match with datafilter rules")
 }
 
-func processor(accessList []policy.CommonRule, in chan<- datafilter.Validate, breaker <-chan string) {
+func processor(policies []policy.CommonPolicy, in chan<- datafilter.Validate, breaker <-chan string) {
 	defer func() {
 		close(in)
 	}()
 
-	for _, v := range accessList {
+	for _, v := range policies {
 		if v.Active {
 			if rule, ok := cacheIn.Get(v.Name); ok {
 				processRule(rule.([]datafilter.Validate), in, breaker)

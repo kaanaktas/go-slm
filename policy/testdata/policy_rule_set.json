@@ -2,13 +2,13 @@
   "policies": [
     {
       "serviceName": "test",
-      "request": "combined_rule",
-      "response": "pan_only_rule"
+      "request": "combined_policy",
+      "response": "pan_only_policy"
     },
     {
       "serviceName": "test2",
-      "request": "combined_rule",
-      "response": "combined_rule"
+      "request": "combined_policy",
+      "response": "pan_only_policy"
     }
   ]
 }

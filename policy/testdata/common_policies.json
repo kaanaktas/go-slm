@@ -1,8 +1,8 @@
 {
-  "rules": [
+  "commonPolicies": [
     {
-      "Name": "combined_rule",
-      "rule": [
+      "PolicyName": "combined_policy",
+      "Policy": [
         {
           "name": "xss",
           "active": true
@@ -18,8 +18,8 @@
       ]
     },
     {
-      "Name": "pan_only_rule",
-      "rule": [
+      "PolicyName": "pan_only_policy",
+      "Policy": [
         {
           "name": "pan_process",
           "active": true

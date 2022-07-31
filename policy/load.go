@@ -13,42 +13,42 @@ const Key = "access_rule"
 
 var cacheIn = cache.NewInMemory()
 
-type CommonRule struct {
+type CommonPolicy struct {
 	Name   string `json:"name"`
 	Active bool   `json:"active"`
 }
 
-type CommonRules struct {
-	Name  string       `json:"Name"`
-	Rules []CommonRule `json:"rule"`
+type commonPolicies struct {
+	CommonPolicyName string         `json:"PolicyName"`
+	Policy           []CommonPolicy `json:"Policy"`
 }
 
-type CommonRuleSet struct {
-	Rules []CommonRules `json:"Rules"`
+type commonPolicySet struct {
+	CommonPolicies []commonPolicies `json:"commonPolicies"`
 }
 
-type Policy struct {
+type policy struct {
 	ServiceName string `json:"serviceName"`
 	Request     string `json:"request"`
 	Response    string `json:"response"`
 }
 
-type Policies struct {
-	Policies []Policy `json:"policies"`
+type policies struct {
+	Policies []policy `json:"policies"`
 }
 
-type Rules map[string][]CommonRule
+type CommonPolicyMap map[string][]CommonPolicy
 
 func Load(policyRuleSetPath, commonRulesPath string) {
 	if policyRuleSetPath == "" {
-		panic("POLICY_RULE_SET_PATH hasn't been set")
+		panic("GO_SLM_POLICY_RULE_SET_PATH hasn't been set")
 	}
 
 	if commonRulesPath == "" {
-		panic("COMMON_RULES_PATH hasn't been set")
+		panic("GO_SLM_COMMON_POLICIES_PATH hasn't been set")
 	}
 
-	var ps Policies
+	var ps policies
 	content, err := config.ReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
 	if err != nil {
 		msg := fmt.Sprintf("Error while reading %s. Error: %s", policyRuleSetPath, err)
@@ -61,7 +61,7 @@ func Load(policyRuleSetPath, commonRulesPath string) {
 		panic(msg)
 	}
 
-	var rules CommonRuleSet
+	var rules commonPolicySet
 	content, err = config.ReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
 	if err != nil {
 		msg := fmt.Sprintf("Error while reading %s. Error: %s", commonRulesPath, err)
@@ -74,19 +74,19 @@ func Load(policyRuleSetPath, commonRulesPath string) {
 		panic(msg)
 	}
 
-	policyRules := make(Rules)
+	policyRules := make(CommonPolicyMap)
 
 	for _, policy := range ps.Policies {
-		for _, rule := range rules.Rules {
-			if rule.Name == policy.Request {
-				policyRules[config.PolicyKey(policy.ServiceName, config.Request)] = rule.Rules
+		for _, rule := range rules.CommonPolicies {
+			if rule.CommonPolicyName == policy.Request {
+				policyRules[config.PolicyKey(policy.ServiceName, config.Request)] = rule.Policy
 			}
-			if rule.Name == policy.Response {
-				policyRules[config.PolicyKey(policy.ServiceName, config.Response)] = rule.Rules
+			if rule.CommonPolicyName == policy.Response {
+				policyRules[config.PolicyKey(policy.ServiceName, config.Response)] = rule.Policy
 			}
 		}
 	}
 
 	_ = cacheIn.Set(Key, policyRules, cache.NoExpiration)
-	log.Println("policy CommonRules have been loaded successfully")
+	log.Println("policy commonPolicies have been loaded successfully")
 }

@@ -4,13 +4,14 @@ import (
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
 	"github.com/kaanaktas/go-slm/executor"
+	"github.com/labstack/gommon/log"
 	"os"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
 	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/policy/testdata/policy_rule_set.json")
-	_ = os.Setenv("GO_SLM_COMMON_RULES_PATH", "/policy/testdata/common_rules.json")
+	_ = os.Setenv("GO_SLM_COMMON_RULES_PATH", "/policy/testdata/common_policies.json")
 	_ = os.Setenv("GO_SLM_CURRENT_MODULE_NAME", "github.com/kaanaktas/dummy")
 
 	os.Exit(m.Run())
@@ -60,6 +61,7 @@ func TestExecute(t *testing.T) {
 			defer func() {
 				r := recover()
 				if (r != nil) && tt.panic == false {
+					log.Error(r)
 					t.Errorf("%s did panic", tt.name)
 				} else if (r == nil) && tt.panic == true {
 					t.Errorf("%s didn't panic", tt.name)

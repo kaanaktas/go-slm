@@ -1,14 +1,18 @@
 package datafilter
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 type pan struct {
 	pattern
 }
 
 func (p pan) Validate(data *string) bool {
+	dataWithoutSpace := strings.ReplaceAll(*data, " ", "")
 	r := regexp.MustCompile(p.Rule)
-	matchList := r.FindAllString(*data, -1)
+	matchList := r.FindAllString(dataWithoutSpace, -1)
 	for _, v := range matchList {
 		if isValidPanNumber(v) {
 			return true
