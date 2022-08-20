@@ -68,7 +68,7 @@ func Execute(data, serviceName, direction string) {
 	case <-closeCh:
 	}
 
-	log.Println("no_match with datafilter rules")
+	log.Println("no match with datafilter rules")
 }
 
 func processor(policies []policy.CommonPolicy, in chan<- datafilter.Validate, breaker <-chan string) {

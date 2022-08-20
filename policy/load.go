@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-const Key = "access_rule"
+const Key = "policy_rule"
 
 var cacheIn = cache.NewInMemory()
 

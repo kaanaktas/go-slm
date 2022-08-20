@@ -83,7 +83,7 @@ In order for the newly created **custom_owasp_attack_sqli.json** file to be cons
 `
 ## policy
 
-We can create reusable policies in our common policy rule file (similar to **/testdata/common_policies.json**) and use them 
+We can create reusable policies in our common policy rule file (similar to **/testconfig/common_policies.json**) and use them 
 to combine different policies in **policy_rule_set.json**. This file can be named based on requirement and should be defined in the **GO_SLM_COMMON_POLICIES_PATH**
 environment variable as in the example below. 
 

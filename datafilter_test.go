@@ -1,21 +1,10 @@
 package main
 
 import (
-	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
 	"github.com/kaanaktas/go-slm/executor"
-	"github.com/labstack/gommon/log"
-	"os"
 	"testing"
 )
-
-func TestMain(m *testing.M) {
-	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/policy/testdata/policy_rule_set.json")
-	_ = os.Setenv("GO_SLM_COMMON_RULES_PATH", "/policy/testdata/common_policies.json")
-	_ = os.Setenv("GO_SLM_CURRENT_MODULE_NAME", "github.com/kaanaktas/dummy")
-
-	os.Exit(m.Run())
-}
 
 func TestExecute(t *testing.T) {
 	type args struct {
@@ -45,7 +34,7 @@ func TestExecute(t *testing.T) {
 			name:  "test_pan_filter",
 			panic: true,
 			args: args{
-				data:        "44044333322221111swfkjbfjksjkf4444333322221111dedeefefefe",
+				data:        "44044 3360110004012 8888 88881881990139424332 2221111",
 				serviceName: "test",
 			}},
 		{
@@ -61,7 +50,6 @@ func TestExecute(t *testing.T) {
 			defer func() {
 				r := recover()
 				if (r != nil) && tt.panic == false {
-					log.Error(r)
 					t.Errorf("%s did panic", tt.name)
 				} else if (r == nil) && tt.panic == true {
 					t.Errorf("%s didn't panic", tt.name)
@@ -69,20 +57,5 @@ func TestExecute(t *testing.T) {
 			}()
 			executor.Execute(tt.args.data, tt.args.serviceName, config.Request)
 		})
-	}
-}
-
-func TestCache(t *testing.T) {
-	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/datafilter/testdata/datafilter_rule_set.json")
-
-	cacheIn := cache.NewInMemory()
-	cacheIn.Flush()
-
-	executor.Execute("test_sqli_filter", "test", config.Request)
-	if _, ok := cacheIn.Get("test_pan_process"); !ok {
-		t.Error("test_pan_process is not in the cache")
-	}
-	if _, ok := cacheIn.Get("pan_process"); !ok {
-		t.Error("pan_process is not in the cache")
 	}
 }

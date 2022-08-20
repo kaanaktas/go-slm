@@ -45,7 +45,7 @@ func Load(dataFilterRuleSetPath string) {
 		}
 		err = json.Unmarshal(content, &customRuleSet)
 		if err != nil {
-			msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.json. Error: %s", err)
+			msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", dataFilterRuleSetPath, err)
 			panic(msg)
 		}
 
@@ -85,12 +85,12 @@ func Load(dataFilterRuleSetPath string) {
 			if rule.CustomPath != "" {
 				content, err = config.ReadFile(filepath.Join(config.RootDirectory, rule.CustomPath))
 				if err != nil {
-					msg := fmt.Sprintf("Error while reading %s. Error: %s", dataFilterRuleSetPath, err)
+					msg := fmt.Sprintf("Error while reading %s. Error: %s", rule.CustomPath, err)
 					panic(msg)
 				}
 				err = json.Unmarshal(content, &customPatterns)
 				if err != nil {
-					msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.json. Error: %s", err)
+					msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", rule.CustomPath, err)
 					panic(msg)
 				}
 			}
