@@ -49,7 +49,7 @@ func Execute(data, serviceName, direction string) {
 		panic("policyRule doesn't exist")
 	}
 
-	policies := cachedRule.(policy.CommonPolicyMap)[policyKey]
+	policies := cachedRule.(policy.CommonPolicies)[policyKey]
 	if len(policies) == 0 {
 		log.Println("No ruleSet found for", serviceName)
 		return

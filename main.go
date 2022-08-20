@@ -16,9 +16,9 @@ func main() {
 		log.Println("All Channels were closed successfully. Number of goroutine:", runtime.NumGoroutine())
 	}()
 
-	_ = os.Setenv("GO_SLM_COMMON_POLICIES_PATH", "/testconfig/common_policies.json")
-	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/testconfig/policy_rule_set.json")
-	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/testconfig/custom_datafilter_rule_set.json")
+	_ = os.Setenv("GO_SLM_COMMON_POLICIES_PATH", "/testconfig/common_policies.yaml")
+	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/testconfig/policy_rule_set.yaml")
+	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/testconfig/custom_datafilter_rule_set.yaml")
 	//pretending to be imported by another project
 	_ = os.Setenv("GO_SLM_CURRENT_MODULE_NAME", "github.com/kaanaktas/dummy")
 

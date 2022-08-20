@@ -1,0 +1,12 @@
+- PolicyName: combined_policy
+  Policy:
+    - name: xss
+      active: true
+    - name: pan_process
+      active: true
+    - name: sqli
+      active: true
+- PolicyName: pan_only_policy
+  Policy:
+    - name: pan_process
+      active: true

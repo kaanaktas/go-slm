@@ -1,0 +1,6 @@
+- serviceName: test
+  request: combined_policy
+  response: pan_only_policy
+- serviceName: test2
+  request: combined_policy
+  response: pan_only_policy

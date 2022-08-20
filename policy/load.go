@@ -1,10 +1,10 @@
 package policy
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
+	"gopkg.in/yaml.v3"
 	"log"
 	"path/filepath"
 )
@@ -14,30 +14,22 @@ const Key = "policy_rule"
 var cacheIn = cache.NewInMemory()
 
 type CommonPolicy struct {
-	Name   string `json:"name"`
-	Active bool   `json:"active"`
+	Name   string `yaml:"name"`
+	Active bool   `yaml:"active"`
 }
 
 type commonPolicies struct {
-	CommonPolicyName string         `json:"PolicyName"`
-	Policy           []CommonPolicy `json:"Policy"`
-}
-
-type commonPolicySet struct {
-	CommonPolicies []commonPolicies `json:"commonPolicies"`
+	PolicyName string         `yaml:"PolicyName"`
+	Policy     []CommonPolicy `yaml:"Policy"`
 }
 
 type policy struct {
-	ServiceName string `json:"serviceName"`
-	Request     string `json:"request"`
-	Response    string `json:"response"`
+	ServiceName string `yaml:"serviceName"`
+	Request     string `yaml:"request"`
+	Response    string `yaml:"response"`
 }
 
-type policies struct {
-	Policies []policy `json:"policies"`
-}
-
-type CommonPolicyMap map[string][]CommonPolicy
+type CommonPolicies map[string][]CommonPolicy
 
 func Load(policyRuleSetPath, commonRulesPath string) {
 	if policyRuleSetPath == "" {
@@ -48,40 +40,40 @@ func Load(policyRuleSetPath, commonRulesPath string) {
 		panic("GO_SLM_COMMON_POLICIES_PATH hasn't been set")
 	}
 
-	var ps policies
+	var policies []policy
 	content, err := config.ReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
 	if err != nil {
 		msg := fmt.Sprintf("Error while reading %s. Error: %s", policyRuleSetPath, err)
 		panic(msg)
 	}
 
-	err = json.Unmarshal(content, &ps)
+	err = yaml.Unmarshal(content, &policies)
 	if err != nil {
 		msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", policyRuleSetPath, err)
 		panic(msg)
 	}
 
-	var rules commonPolicySet
+	var retrievedCommonPolicies []commonPolicies
 	content, err = config.ReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
 	if err != nil {
 		msg := fmt.Sprintf("Error while reading %s. Error: %s", commonRulesPath, err)
 		panic(msg)
 	}
 
-	err = json.Unmarshal(content, &rules)
+	err = yaml.Unmarshal(content, &retrievedCommonPolicies)
 	if err != nil {
 		msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", commonRulesPath, err)
 		panic(msg)
 	}
 
-	policyRules := make(CommonPolicyMap)
+	policyRules := make(CommonPolicies)
 
-	for _, policy := range ps.Policies {
-		for _, rule := range rules.CommonPolicies {
-			if rule.CommonPolicyName == policy.Request {
+	for _, policy := range policies {
+		for _, rule := range retrievedCommonPolicies {
+			if rule.PolicyName == policy.Request {
 				policyRules[config.PolicyKey(policy.ServiceName, config.Request)] = rule.Policy
 			}
-			if rule.CommonPolicyName == policy.Response {
+			if rule.PolicyName == policy.Response {
 				policyRules[config.PolicyKey(policy.ServiceName, config.Response)] = rule.Policy
 			}
 		}

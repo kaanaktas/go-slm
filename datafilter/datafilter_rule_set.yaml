@@ -1,0 +1,10 @@
+- type: pan
+  rules:
+      - name: pan_process
+        path: rules/pan_process.yaml
+- type: owasp
+  rules:
+      - name: sqli
+        path: rules/owasp_attack_sqli.yaml
+      - name: xss
+        path: rules/owasp_attack_xss.yaml

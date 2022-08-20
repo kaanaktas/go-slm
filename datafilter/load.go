@@ -2,28 +2,28 @@ package datafilter
 
 import (
 	"embed"
-	"encoding/json"
 	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
+	"gopkg.in/yaml.v3"
 	"log"
 	"path/filepath"
 )
 
 type ruleSet struct {
-	Type  string  `json:"type"`
-	Rules []rules `json:"rules"`
+	Type  string  `yaml:"type"`
+	Rules []rules `yaml:"rules"`
 }
 
 type rules struct {
-	Name       string `json:"name"`
-	Path       string `json:"path"`
-	CustomPath string `json:"custom_path"`
+	Name       string `yaml:"name"`
+	Path       string `yaml:"path"`
+	CustomPath string `yaml:"custom_path"`
 }
 
 var cacheIn = cache.NewInMemory()
 
-//go:embed datafilter_rule_set.json
+//go:embed datafilter_rule_set.yaml
 var dataFilterRuleSet []byte
 
 //go:embed rules/*
@@ -31,9 +31,9 @@ var ruleFs embed.FS
 
 func Load(dataFilterRuleSetPath string) {
 	var ruleSet, customRuleSet []ruleSet
-	err := json.Unmarshal(dataFilterRuleSet, &ruleSet)
+	err := yaml.Unmarshal(dataFilterRuleSet, &ruleSet)
 	if err != nil {
-		msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.json. Error: %s", err)
+		msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.yaml. Error: %s", err)
 		panic(msg)
 	}
 
@@ -43,7 +43,7 @@ func Load(dataFilterRuleSetPath string) {
 			msg := fmt.Sprintf("Error while reading %s. Error: %s", dataFilterRuleSetPath, err)
 			panic(msg)
 		}
-		err = json.Unmarshal(content, &customRuleSet)
+		err = yaml.Unmarshal(content, &customRuleSet)
 		if err != nil {
 			msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", dataFilterRuleSetPath, err)
 			panic(msg)
@@ -76,7 +76,7 @@ func Load(dataFilterRuleSetPath string) {
 			}
 
 			var patterns, customPatterns []pattern
-			err = json.Unmarshal(content, &patterns)
+			err = yaml.Unmarshal(content, &patterns)
 			if err != nil {
 				msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", rule.Path, err)
 				panic(msg)
@@ -88,7 +88,7 @@ func Load(dataFilterRuleSetPath string) {
 					msg := fmt.Sprintf("Error while reading %s. Error: %s", rule.CustomPath, err)
 					panic(msg)
 				}
-				err = json.Unmarshal(content, &customPatterns)
+				err = yaml.Unmarshal(content, &customPatterns)
 				if err != nil {
 					msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", rule.CustomPath, err)
 					panic(msg)

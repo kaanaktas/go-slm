@@ -11,7 +11,7 @@ import (
 )
 
 func TestDataFilterRuleLoad(t *testing.T) {
-	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/testconfig/custom_datafilter_rule_set.json")
+	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/testconfig/custom_datafilter_rule_set.yaml")
 
 	cacheIn := cache.NewInMemory()
 	cacheIn.Flush()
@@ -95,12 +95,12 @@ func TestPolicyLoad(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if cachedData, ok := cacheIn.Get(test.policy.name); ok {
-				if len(cachedData.(policy.CommonPolicyMap)) != test.policy.size {
+				if len(cachedData.(policy.CommonPolicies)) != test.policy.size {
 					t.Errorf("cached data size doesn't match up. Expected: %d, got:%d", test.policy.size,
-						len(cachedData.(policy.CommonPolicyMap)))
+						len(cachedData.(policy.CommonPolicies)))
 				}
 				for _, v := range test.policy.policies {
-					cachedPolicies := cachedData.(policy.CommonPolicyMap)
+					cachedPolicies := cachedData.(policy.CommonPolicies)
 					if _, exists := cachedPolicies[v]; !exists {
 						t.Errorf("%s is not in the policy rule set", v)
 					}
