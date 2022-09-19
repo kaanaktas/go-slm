@@ -6,9 +6,10 @@ and set to different services via basic configuration files.
 Introduction
 ------------
 
-Currently, go-slm supports data filtering including owasp sql injection rules, owasp xss rules and PAN process, and rule definitions for each can be found under **datafilter/rules**. 
+go-slm supports **data filtering**; including owasp sql injection rules, owasp xss rules and 
+PAN process(rule definitions for each can be found under **datafilter/rules**) and **service schedule**. 
 Existing rules can be expanded according to needs, or rules that are deemed unnecessary can be disabled.
-The rule-sets under https://github.com/coreruleset/coreruleset are referenced for Owasp rule definitions. 
+The rule-sets under **https://github.com/coreruleset/coreruleset** are referenced for Owasp rule definitions. 
 If there is a requirement for other rule-sets in **Coreruleset**, configuration files can be created in the same way.
 
 Installation
@@ -68,11 +69,44 @@ In order for the newly created **custom_owasp_attack_sqli.yaml** file to be cons
 
 `_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/{directory}/custom_datafilter_rule_set.yaml")
 `
+
+## schedule
+
+According to our needs, we can define new schedule policies on a day and hour basis and create a priority order for them, while defining in the common policies.
+
+**schedule.yaml**
+
+```
+- scheduleName: weekend
+  days:
+    - Saturday
+    - Sunday
+      start: 00:00:00
+      duration: 1440
+      message: The service is not permitted during the weekend
+- scheduleName: weekdays
+  days:
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+      start: 08:00:00
+      duration: 600
+      message: The service is not permitted in the weekdays between 08:00 and 18:00
+```
+
+This file can be named based on requirement and should be defined in the **GO_SLM_SCHEDULE_POLICY_PATH**
+environment variable as in the example below.
+
+`_ = os.Setenv("GO_SLM_SCHEDULE_POLICY_PATH", "/{directory}/schedule.yaml")
+`
+
 ## policy
 
-We can create reusable policies in our common policy rule file (similar to **/testconfig/common_policies.yaml**) and use them 
-to combine different policies in **policy_rule_set.yaml**. This file can be named based on requirement and should be defined in the **GO_SLM_COMMON_POLICIES_PATH**
-environment variable as in the example below. 
+We can create reusable policies in our common policy rule file (similar to **/testconfig/common_policies.yaml**), we can reorder them in order of priority
+and use them to combine different policies in **policy_rule_set.yaml**. This file can be named based on requirement and should be defined in 
+the **GO_SLM_COMMON_POLICIES_PATH** environment variable as in the example below. 
 
 `_ = os.Setenv("GO_SLM_COMMON_POLICIES_PATH", "/{directory}/common_policies.yaml")
 `
@@ -80,18 +114,27 @@ environment variable as in the example below.
 **common_policies.yaml**
 
 ```
-- PolicyName: combined_policy
-  Policy:
-    - name: xss
-      active: true
-    - name: pan_process
-      active: true
-    - name: sqli
-      active: true
-- PolicyName: pan_only_policy
-  Policy:
-    - name: pan_process
-      active: true
+ policy:
+    name: combined_policy
+    statement:
+      - type: data
+        order: 100
+        action:
+          - name: xss
+            active: true
+          - name: pan_process
+            active: true
+          - name: sqli
+            active: true
+      - type: schedule
+        order: 20
+        action:
+          - name: weekend
+            active: true
+            order: 10
+          - name: weekdays
+            active: true
+            order: 20
 ```
 
 Below, you can see how policy definitions are generated for our API services. Simply, our common policies that we defined 
@@ -103,7 +146,6 @@ environment variable as in the example below.
 `
 
 **policy_rule_set.yaml**
-
 
 ```
 - serviceName: test
