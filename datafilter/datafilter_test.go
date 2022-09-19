@@ -65,7 +65,11 @@ func TestExecuteDataFilter(t *testing.T) {
 				}
 			}()
 
-			Apply(actions, &tt.args.data)
+			executor := &Executor{
+				Actions: actions,
+				Data:    &tt.args.data,
+			}
+			executor.Apply()
 		})
 	}
 }

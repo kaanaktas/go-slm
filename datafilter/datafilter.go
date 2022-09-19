@@ -8,13 +8,18 @@ import (
 	"sync"
 )
 
-func Apply(actions []policy.Action, data *string) {
+type Executor struct {
+	Actions []policy.Action
+	Data    *string
+}
+
+func (e *Executor) Apply() {
 	breaker := make(chan string)
 	in := make(chan Validate)
 	closeCh := make(chan struct{})
 
-	go processor(actions, in, breaker)
-	go validator(data, in, closeCh, breaker)
+	go processor(e.Actions, in, breaker)
+	go validator(e.Data, in, closeCh, breaker)
 
 	select {
 	case v := <-breaker:

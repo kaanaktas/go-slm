@@ -26,29 +26,22 @@ type schedule struct {
 	Message      string   `yaml:"message"`
 }
 
-func Load(scheduleStatementPath string) {
-	if scheduleStatementPath == "" {
-		panic("GO_SLM_SCHEDULE_STATEMENT_PATH hasn't been set")
-	}
-	content := config.MustReadFile(filepath.Join(config.RootDirectory, scheduleStatementPath))
-	var schedules []schedule
-	config.MustUnmarshalYaml(scheduleStatementPath, content, &schedules)
-
-	cacheIn.Set(key, schedules, cache.NoExpiration)
+type Executor struct {
+	Actions []policy.Action
 }
 
-func Apply(actions []policy.Action) {
+func (e *Executor) Apply() {
 	cachedSchedule, ok := cacheIn.Get(key)
 	if !ok {
 		panic("schedule doesn't exist in the cache")
 	}
 
 	schedules := cachedSchedule.([]schedule)
-	sort.Slice(actions, func(i, j int) bool {
-		return actions[i].Order < actions[j].Order
+	sort.Slice(e.Actions, func(i, j int) bool {
+		return e.Actions[i].Order < e.Actions[j].Order
 	})
 
-	for _, action := range actions {
+	for _, action := range e.Actions {
 		if action.Active {
 			for _, sc := range schedules {
 				if sc.ScheduleName == action.Name {
@@ -59,6 +52,17 @@ func Apply(actions []policy.Action) {
 			}
 		}
 	}
+}
+
+func Load(scheduleStatementPath string) {
+	if scheduleStatementPath == "" {
+		panic("GO_SLM_SCHEDULE_STATEMENT_PATH hasn't been set")
+	}
+	content := config.MustReadFile(filepath.Join(config.RootDirectory, scheduleStatementPath))
+	var schedules []schedule
+	config.MustUnmarshalYaml(scheduleStatementPath, content, &schedules)
+
+	cacheIn.Set(key, schedules, cache.NoExpiration)
 }
 
 func isScheduleMatchWithPolicy(sc schedule) bool {

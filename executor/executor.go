@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
 	"github.com/kaanaktas/go-slm/datafilter"
@@ -11,6 +12,10 @@ import (
 )
 
 var cacheIn = cache.NewInMemory()
+
+type Executor interface {
+	Apply()
+}
 
 type specification struct {
 	PolicyRuleSetPath     string `envconfig:"policy_rule_set_path"`
@@ -56,11 +61,18 @@ func Apply(data, serviceName, direction string) {
 	}
 
 	for _, statement := range policyStatements {
-		switch statement.Type {
-		case config.StatementSchedule:
-			schedule.Apply(statement.Actions)
-		case config.StatementData:
-			datafilter.Apply(statement.Actions, &data)
-		}
+		statementExecutor := createExecutor(data, statement.Type, statement.Actions)
+		statementExecutor.Apply()
+	}
+}
+
+func createExecutor(data string, statementType string, actions []policy.Action) Executor {
+	switch statementType {
+	case config.StatementSchedule:
+		return &schedule.Executor{Actions: actions}
+	case config.StatementData:
+		return &datafilter.Executor{Actions: actions, Data: &data}
+	default:
+		panic(fmt.Sprintf("StatementType: %s doesn't exist", statementType))
 	}
 }
