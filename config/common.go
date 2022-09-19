@@ -1,6 +1,8 @@
 package config
 
 import (
+	"fmt"
+	"gopkg.in/yaml.v3"
 	"log"
 	"os"
 	"runtime/debug"
@@ -15,15 +17,26 @@ const (
 	Response = "response"
 )
 
+const (
+	StatementSchedule = "schedule"
+	StatementData     = "data"
+)
+
 var RootDirectory, _ = os.Getwd()
 
-func ReadFile(fileName string) ([]byte, error) {
+func MustReadFile(fileName string) []byte {
 	content, err := os.ReadFile(fileName)
 	if err != nil {
-		return nil, err
+		panic(fmt.Sprintf("Error while reading %s. Error: %s", fileName, err))
 	}
+	return content
+}
 
-	return content, nil
+func MustUnmarshalYaml(path string, content []byte, decodedContent interface{}) {
+	err := yaml.Unmarshal(content, decodedContent)
+	if err != nil {
+		panic(fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", path, err))
+	}
 }
 
 func Elapsed(msg string) func() {

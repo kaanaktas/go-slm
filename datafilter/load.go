@@ -31,79 +31,14 @@ var ruleFs embed.FS
 
 func Load(dataFilterRuleSetPath string) {
 	var ruleSet, customRuleSet []ruleSet
-	err := yaml.Unmarshal(dataFilterRuleSet, &ruleSet)
-	if err != nil {
-		msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.yaml. Error: %s", err)
-		panic(msg)
-	}
-
-	if dataFilterRuleSetPath != "" {
-		content, err := config.ReadFile(filepath.Join(config.RootDirectory, dataFilterRuleSetPath))
-		if err != nil {
-			msg := fmt.Sprintf("Error while reading %s. Error: %s", dataFilterRuleSetPath, err)
-			panic(msg)
-		}
-		err = yaml.Unmarshal(content, &customRuleSet)
-		if err != nil {
-			msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", dataFilterRuleSetPath, err)
-			panic(msg)
-		}
-
-		for i := 0; i < len(customRuleSet); i++ {
-			ruleType := customRuleSet[i].Type
-			rsIndex := indexOfRuleSet(ruleSet, ruleType)
-			if rsIndex == -1 {
-				ruleSet = append(ruleSet, customRuleSet[i])
-			} else {
-				customRules := customRuleSet[i].Rules
-				for k := 0; k < len(customRules); k++ {
-					index := indexOfRule(ruleSet[rsIndex].Rules, customRules[k].Name)
-					if index == -1 {
-						ruleSet[rsIndex].Rules = append(ruleSet[rsIndex].Rules, customRules[k])
-					} else {
-						(ruleSet[rsIndex]).Rules[index] = customRules[k]
-					}
-				}
-			}
-		}
-	}
+	unmarshalYamlAndPopulateDefaultDataFilterRuleSet(&ruleSet)
+	checkAndAssignCustomDataFilterRuleSet(dataFilterRuleSetPath, customRuleSet, &ruleSet)
 
 	for _, set := range ruleSet {
 		for _, rule := range set.Rules {
-			content, err := ruleFs.ReadFile(rule.Path)
-			if err != nil {
-				panic(err)
-			}
-
 			var patterns, customPatterns []pattern
-			err = yaml.Unmarshal(content, &patterns)
-			if err != nil {
-				msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", rule.Path, err)
-				panic(msg)
-			}
-
-			if rule.CustomPath != "" {
-				content, err = config.ReadFile(filepath.Join(config.RootDirectory, rule.CustomPath))
-				if err != nil {
-					msg := fmt.Sprintf("Error while reading %s. Error: %s", rule.CustomPath, err)
-					panic(msg)
-				}
-				err = yaml.Unmarshal(content, &customPatterns)
-				if err != nil {
-					msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", rule.CustomPath, err)
-					panic(msg)
-				}
-			}
-
-			for i := 0; i < len(customPatterns); i++ {
-				patternName := customPatterns[i].Name
-				patternIndex := indexOfPatterns(patterns, patternName)
-				if patternIndex == -1 {
-					patterns = append(patterns, customPatterns[i])
-				} else {
-					patterns[patternIndex] = customPatterns[i]
-				}
-			}
+			unmarshalYamlAndPopulatePatterns(rule, &patterns, &customPatterns)
+			assignPatterns(customPatterns, &patterns)
 
 			validateRule := make([]Validate, len(patterns))
 			switch set.Type {
@@ -116,11 +51,77 @@ func Load(dataFilterRuleSetPath string) {
 					validateRule[i] = owasp{pattern: v}
 				}
 			}
-
-			_ = cacheIn.Set(rule.Name, validateRule, cache.NoExpiration)
+			cacheIn.Set(rule.Name, validateRule, cache.NoExpiration)
 		}
 	}
 	log.Println("datafilter rules have been loaded successfully")
+}
+
+func assignPatterns(customPatterns []pattern, patterns *[]pattern) {
+	copyOfPatterns := *patterns
+	for i := 0; i < len(customPatterns); i++ {
+		patternName := customPatterns[i].Name
+		patternIndex := indexOfPatterns(copyOfPatterns, patternName)
+		if patternIndex == -1 {
+			copyOfPatterns = append(copyOfPatterns, customPatterns[i])
+		} else {
+			copyOfPatterns[patternIndex] = customPatterns[i]
+		}
+	}
+	patterns = &copyOfPatterns
+}
+
+func checkAndAssignCustomDataFilterRuleSet(dataFilterRuleSetPath string, customRuleSet []ruleSet, ruleSet *[]ruleSet) {
+	if dataFilterRuleSetPath == "" {
+		return
+	}
+	unmarshalYamlAndPopulateCustomDataFilterRuleSet(dataFilterRuleSetPath, &customRuleSet)
+
+	copyOfRuleSet := *ruleSet
+	for i := 0; i < len(customRuleSet); i++ {
+		ruleType := customRuleSet[i].Type
+		rsIndex := indexOfRuleSet(copyOfRuleSet, ruleType)
+		if rsIndex == -1 {
+			copyOfRuleSet = append(copyOfRuleSet, customRuleSet[i])
+		} else {
+			customRules := customRuleSet[i].Rules
+			for k := 0; k < len(customRules); k++ {
+				index := indexOfRule(copyOfRuleSet[rsIndex].Rules, customRules[k].Name)
+				if index == -1 {
+					copyOfRuleSet[rsIndex].Rules = append(copyOfRuleSet[rsIndex].Rules, customRules[k])
+				} else {
+					(copyOfRuleSet[rsIndex]).Rules[index] = customRules[k]
+				}
+			}
+		}
+	}
+	ruleSet = &copyOfRuleSet
+}
+
+func unmarshalYamlAndPopulatePatterns(rule rules, patterns *[]pattern, customPatterns *[]pattern) {
+	content, err := ruleFs.ReadFile(rule.Path)
+	if err != nil {
+		panic(err)
+	}
+
+	config.MustUnmarshalYaml(rule.Path, content, &patterns)
+	if rule.CustomPath != "" {
+		content = config.MustReadFile(filepath.Join(config.RootDirectory, rule.CustomPath))
+		config.MustUnmarshalYaml(rule.CustomPath, content, &customPatterns)
+	}
+}
+
+func unmarshalYamlAndPopulateCustomDataFilterRuleSet(dataFilterRuleSetPath string, customRuleSet *[]ruleSet) {
+	content := config.MustReadFile(filepath.Join(config.RootDirectory, dataFilterRuleSetPath))
+	config.MustUnmarshalYaml(dataFilterRuleSetPath, content, &customRuleSet)
+}
+
+func unmarshalYamlAndPopulateDefaultDataFilterRuleSet(ruleSet *[]ruleSet) {
+	err := yaml.Unmarshal(dataFilterRuleSet, &ruleSet)
+	if err != nil {
+		msg := fmt.Sprintf("Can't unmarshall the content of datafilter_rule_set.yaml. Error: %s", err)
+		panic(msg)
+	}
 }
 
 func indexOfRuleSet(ruleSet []ruleSet, ruleType string) int {

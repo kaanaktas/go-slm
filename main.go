@@ -16,29 +16,48 @@ func main() {
 		log.Println("All Channels were closed successfully. Number of goroutine:", runtime.NumGoroutine())
 	}()
 
-	_ = os.Setenv("GO_SLM_COMMON_POLICIES_PATH", "/testconfig/common_policies.yaml")
-	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/testconfig/policy_rule_set.yaml")
-	_ = os.Setenv("GO_SLM_DATA_FILTER_RULE_SET_PATH", "/testconfig/custom_datafilter_rule_set.yaml")
+	_ = os.Setenv("GO_SLM_COMMON_POLICIES_PATH", "/policy/testdata/common_policies.yaml")
+	_ = os.Setenv("GO_SLM_POLICY_RULE_SET_PATH", "/policy/testdata/policy_rule_set.yaml")
+	_ = os.Setenv("GO_SLM_SCHEDULE_POLICY_PATH", "/schedule/testdata/schedule.yaml")
 	//pretending to be imported by another project
 	_ = os.Setenv("GO_SLM_CURRENT_MODULE_NAME", "github.com/kaanaktas/dummy")
 
-	serviceName := "test"
-	data := []string{
-		"clear data with no match",
-		"admin' AND 1=1 --",
-		"https://testing.com/book.html?default=<script>alert(document.cookie)</script>",
-		"44044 3360110004012 8888 88881881990139424332 2221111"}
+	serviceData := []struct {
+		serviceName string
+		data        string
+	}{
+		{
+			serviceName: "test3",
+			data:        "clear data with no match",
+		},
+		{
+			serviceName: "test3",
+			data:        "admin' AND 1=1 --",
+		},
+		{
+			serviceName: "test3",
+			data:        "https://testing.com/book.html?default=<script>alert(document.cookie)</script>",
+		},
+		{
+			serviceName: "test3",
+			data:        "44044 3360110004012 8888 88881881990139424332 2221111",
+		},
+		{
+			serviceName: "test",
+			data:        "catch_schedule",
+		},
+	}
 
-	for _, data := range data {
+	for _, sd := range serviceData {
 		func() {
 			defer func() {
 				if r := recover(); r != nil {
-					log.Println("Recovered in Execute", r)
+					log.Println("Recovered in Apply", r)
 				}
 				log.Println("--------")
 			}()
-			log.Println("Filtering data:", data)
-			executor.Execute(data, serviceName, config.Request)
+			log.Println("Filtering data:", sd.data)
+			executor.Apply(sd.data, sd.serviceName, config.Request)
 		}()
 	}
 }

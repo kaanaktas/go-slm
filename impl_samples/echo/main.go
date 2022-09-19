@@ -40,7 +40,7 @@ func testPost(c echo.Context) error {
 
 func testGet(c echo.Context) error {
 	p1 := c.QueryParam("param1")
-	executor.Execute(p1, "test", config.Request)
+	executor.Apply(p1, "test", config.Request)
 	return c.JSON(http.StatusOK, "no_match")
 }
 

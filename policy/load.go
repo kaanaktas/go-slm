@@ -1,26 +1,34 @@
 package policy
 
 import (
-	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
-	"gopkg.in/yaml.v3"
 	"log"
 	"path/filepath"
+	"sort"
 )
 
 const Key = "policy_rule"
 
 var cacheIn = cache.NewInMemory()
 
-type CommonPolicy struct {
+type Action struct {
 	Name   string `yaml:"name"`
 	Active bool   `yaml:"active"`
+	Order  int    `yaml:"order"`
+}
+
+type statement struct {
+	Type    string   `yaml:"type"`
+	Order   int      `yaml:"order"`
+	Actions []Action `yaml:"action"`
 }
 
 type commonPolicies struct {
-	PolicyName string         `yaml:"PolicyName"`
-	Policy     []CommonPolicy `yaml:"Policy"`
+	Policy struct {
+		Name       string      `yaml:"name"`
+		Statements []statement `yaml:"statement"`
+	} `json:"policy"`
 }
 
 type policy struct {
@@ -29,56 +37,51 @@ type policy struct {
 	Response    string `yaml:"response"`
 }
 
-type CommonPolicies map[string][]CommonPolicy
+type Statements map[string][]statement
 
 func Load(policyRuleSetPath, commonRulesPath string) {
 	if policyRuleSetPath == "" {
 		panic("GO_SLM_POLICY_RULE_SET_PATH hasn't been set")
 	}
-
 	if commonRulesPath == "" {
 		panic("GO_SLM_COMMON_POLICIES_PATH hasn't been set")
 	}
 
 	var policies []policy
-	content, err := config.ReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
-	if err != nil {
-		msg := fmt.Sprintf("Error while reading %s. Error: %s", policyRuleSetPath, err)
-		panic(msg)
-	}
-
-	err = yaml.Unmarshal(content, &policies)
-	if err != nil {
-		msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", policyRuleSetPath, err)
-		panic(msg)
-	}
+	unmarshalYamlAndPopulatePolicies(policyRuleSetPath, &policies)
 
 	var retrievedCommonPolicies []commonPolicies
-	content, err = config.ReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
-	if err != nil {
-		msg := fmt.Sprintf("Error while reading %s. Error: %s", commonRulesPath, err)
-		panic(msg)
-	}
+	unmarshalYamlAndPopulateCommonPolicies(commonRulesPath, &retrievedCommonPolicies)
 
-	err = yaml.Unmarshal(content, &retrievedCommonPolicies)
-	if err != nil {
-		msg := fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", commonRulesPath, err)
-		panic(msg)
-	}
-
-	policyRules := make(CommonPolicies)
-
+	statements := make(Statements)
 	for _, policy := range policies {
 		for _, rule := range retrievedCommonPolicies {
-			if rule.PolicyName == policy.Request {
-				policyRules[config.PolicyKey(policy.ServiceName, config.Request)] = rule.Policy
+			if rule.Policy.Name == policy.Request {
+				populatePolicyRules(rule, statements, config.PolicyKey(policy.ServiceName, config.Request))
 			}
-			if rule.PolicyName == policy.Response {
-				policyRules[config.PolicyKey(policy.ServiceName, config.Response)] = rule.Policy
+			if rule.Policy.Name == policy.Response {
+				populatePolicyRules(rule, statements, config.PolicyKey(policy.ServiceName, config.Response))
 			}
 		}
 	}
+	cacheIn.Set(Key, statements, cache.NoExpiration)
 
-	_ = cacheIn.Set(Key, policyRules, cache.NoExpiration)
-	log.Println("policy commonPolicies have been loaded successfully")
+	log.Println("common policies have been loaded successfully")
+}
+
+func unmarshalYamlAndPopulateCommonPolicies(commonRulesPath string, retrievedCommonPolicies *[]commonPolicies) {
+	content := config.MustReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
+	config.MustUnmarshalYaml(commonRulesPath, content, retrievedCommonPolicies)
+}
+
+func unmarshalYamlAndPopulatePolicies(policyRuleSetPath string, policies *[]policy) {
+	content := config.MustReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
+	config.MustUnmarshalYaml(policyRuleSetPath, content, policies)
+}
+
+func populatePolicyRules(rule commonPolicies, policyRules Statements, policyRuleKey string) {
+	sort.Slice(rule.Policy.Statements, func(i, j int) bool {
+		return rule.Policy.Statements[i].Order < rule.Policy.Statements[j].Order
+	})
+	policyRules[policyRuleKey] = rule.Policy.Statements
 }

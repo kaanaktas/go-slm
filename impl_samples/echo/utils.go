@@ -22,7 +22,7 @@ func requestDump(s ServiceIdExtractor) echo.MiddlewareFunc {
 			c.Request().Body = ioutil.NopCloser(bytes.NewBuffer(reqBody))
 
 			serviceName := s(c)
-			executor.Execute(string(reqBody), serviceName, config.Request)
+			executor.Apply(string(reqBody), serviceName, config.Request)
 
 			return next(c)
 		}
@@ -35,7 +35,7 @@ func extractServiceId(c echo.Context) string {
 }
 
 func responseBeforeHook(respBody string, c echo.Context, s ServiceIdExtractor) {
-	executor.Execute(respBody, s(c), config.Response)
+	executor.Apply(respBody, s(c), config.Response)
 }
 
 func customRecover(next echo.HandlerFunc) echo.HandlerFunc {

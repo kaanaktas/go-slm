@@ -1,0 +1,17 @@
+- scheduleName: weekend
+  days:
+    - Saturday
+    - Sunday
+  start: 00:00:00
+  duration: 1440
+  message: The service is not permitted during the weekend
+- scheduleName: weekdays
+  days:
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+  start: 08:00:00
+  duration: 600
+  message: The service is not permitted in the weekdays between 08:00 and 18:00

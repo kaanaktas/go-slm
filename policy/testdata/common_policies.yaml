@@ -1,0 +1,40 @@
+- policy:
+    name: combined_policy
+    statement:
+      - type: data
+        order: 100
+        action:
+          - name: xss
+            active: true
+          - name: pan_process
+            active: true
+          - name: sqli
+            active: true
+      - type: schedule
+        order: 20
+        action:
+          - name: weekend
+            active: true
+            order: 10
+          - name: weekdays
+            active: true
+            order: 20
+- policy:
+    name: pan_only_policy
+    statement:
+      - type: data
+        action:
+          - name: pan_process
+            active: true
+- policy:
+    name: combined_policy_no_schedule
+    statement:
+      - type: data
+        order: 100
+        action:
+          - name: xss
+            active: true
+          - name: pan_process
+            active: true
+          - name: sqli
+            active: true

@@ -6,7 +6,7 @@ import (
 
 type Cache interface {
 	Get(k string) (interface{}, bool)
-	Set(k string, v interface{}, d time.Duration) error
+	Set(k string, v interface{}, d time.Duration)
 	Flush()
 }
 

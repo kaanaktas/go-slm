@@ -14,9 +14,8 @@ func (i *inMemory) Get(k string) (interface{}, bool) {
 	return i.cache.Get(k)
 }
 
-func (i *inMemory) Set(k string, v interface{}, d time.Duration) error {
+func (i *inMemory) Set(k string, v interface{}, d time.Duration) {
 	i.cache.Set(k, v, d*time.Minute)
-	return nil
 }
 
 func (i *inMemory) Flush() {

@@ -1,29 +1,28 @@
 package executor
 
 import (
-	"fmt"
 	"github.com/kaanaktas/go-slm/cache"
 	"github.com/kaanaktas/go-slm/config"
 	"github.com/kaanaktas/go-slm/datafilter"
 	"github.com/kaanaktas/go-slm/policy"
+	"github.com/kaanaktas/go-slm/schedule"
 	"github.com/kelseyhightower/envconfig"
 	"log"
-	"sync"
 )
 
 var cacheIn = cache.NewInMemory()
 
-type Specification struct {
+type specification struct {
 	PolicyRuleSetPath     string `envconfig:"policy_rule_set_path"`
 	CommonRulesPath       string `envconfig:"common_policies_path"`
 	DataFilterRuleSetPath string `envconfig:"data_filter_rule_set_path"`
+	SchedulePolicyPath    string `envconfig:"schedule_policy_path"`
 	CurrentModuleName     string `envconfig:"current_module_name"`
 }
 
-func loadConfiguration() {
-	var spec Specification
-	err := envconfig.Process("go_slm", &spec)
-	if err != nil {
+func loadSpecification() {
+	var spec specification
+	if err := envconfig.Process("go_slm", &spec); err != nil {
 		log.Fatal(err.Error())
 	}
 
@@ -31,108 +30,37 @@ func loadConfiguration() {
 		panic("root directory is empty or module is not imported")
 	}
 
-	policy.Load(spec.PolicyRuleSetPath, spec.CommonRulesPath)
+	schedule.Load(spec.SchedulePolicyPath)
 	datafilter.Load(spec.DataFilterRuleSetPath)
+	policy.Load(spec.PolicyRuleSetPath, spec.CommonRulesPath)
 }
 
 var isConfigurationFlagSet = "isConfigurationFlagSet"
 
-func Execute(data, serviceName, direction string) {
+func Apply(data, serviceName, direction string) {
 	if _, ok := cacheIn.Get(isConfigurationFlagSet); !ok {
-		loadConfiguration()
-		_ = cacheIn.Set(isConfigurationFlagSet, true, cache.NoExpiration)
+		loadSpecification()
+		cacheIn.Set(isConfigurationFlagSet, true, cache.NoExpiration)
 	}
 
-	policyKey := config.PolicyKey(serviceName, direction)
-	cachedRule, ok := cacheIn.Get(policy.Key)
+	cachedPolicy, ok := cacheIn.Get(policy.Key)
 	if !ok {
-		panic("policyRule doesn't exist")
+		panic("policy doesn't exist in the cache")
 	}
 
-	policies := cachedRule.(policy.CommonPolicies)[policyKey]
-	if len(policies) == 0 {
-		log.Println("No ruleSet found for", serviceName)
+	dynamicPolicyKey := config.PolicyKey(serviceName, direction)
+	policyStatements := cachedPolicy.(policy.Statements)[dynamicPolicyKey]
+	if len(policyStatements) == 0 {
+		log.Println("No policy statements found for", serviceName)
 		return
 	}
 
-	breaker := make(chan string)
-	in := make(chan datafilter.Validate)
-	closeCh := make(chan struct{})
-
-	go processor(policies, in, breaker)
-	go validator(&data, in, closeCh, breaker)
-
-	select {
-	case v := <-breaker:
-		panic(v)
-	case <-closeCh:
-	}
-
-	log.Println("no match with datafilter rules")
-}
-
-func processor(policies []policy.CommonPolicy, in chan<- datafilter.Validate, breaker <-chan string) {
-	defer func() {
-		close(in)
-	}()
-
-	for _, v := range policies {
-		if v.Active {
-			if rule, ok := cacheIn.Get(v.Name); ok {
-				processRule(rule.([]datafilter.Validate), in, breaker)
-			}
+	for _, statement := range policyStatements {
+		switch statement.Type {
+		case config.StatementSchedule:
+			schedule.Apply(statement.Actions)
+		case config.StatementData:
+			datafilter.Apply(statement.Actions, &data)
 		}
 	}
-}
-
-func processRule(patterns []datafilter.Validate, in chan<- datafilter.Validate, breaker <-chan string) {
-	var wg sync.WaitGroup
-
-	for _, pattern := range patterns {
-		wg.Add(1)
-
-		pattern := pattern
-		go func() {
-			defer wg.Done()
-
-			if !pattern.Disable() {
-				select {
-				case <-breaker:
-					return
-				case in <- pattern:
-				}
-			}
-		}()
-	}
-
-	wg.Wait()
-}
-
-func validator(data *string, in <-chan datafilter.Validate, closeCh chan<- struct{}, breaker chan<- string) {
-	defer func() {
-		close(closeCh)
-	}()
-
-	var wg sync.WaitGroup
-
-	//Distribute work to multiple workers
-	for i := 0; i < config.NumberOfWorker; i++ {
-		wg.Add(1)
-		worker(&wg, data, in, breaker)
-	}
-
-	wg.Wait()
-}
-
-func worker(wg *sync.WaitGroup, data *string, in <-chan datafilter.Validate, breaker chan<- string) {
-	go func() {
-		defer wg.Done()
-
-		for v := range in {
-			if v.Validate(data) {
-				breaker <- fmt.Sprint(v.ToString())
-				return
-			}
-		}
-	}()
 }

@@ -2,7 +2,7 @@
   rules:
       - name: pan_process
         path: rules/pan_process.yaml
-        custom_path: /testconfig/custom_pan_process.yaml
+        custom_path: /testdata/custom_pan_process.yaml
       - name: custom_pan_process
         path: rules/pan_process.yaml
         custom_path: ''
