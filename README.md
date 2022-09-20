@@ -1,3 +1,6 @@
+
+![go-slm](https://github.com/kaanaktas/go-slm/workflows/go-slm/badge.svg)
+
 # go-slm
 
 go-slm is a policy-based service level management library that enforces policy requirements as per service. Different policy rules can be combined 
