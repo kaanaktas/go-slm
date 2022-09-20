@@ -1,3 +1,7 @@
+
+![go-slm](https://github.com/kaanaktas/go-slm/workflows/go-slm/badge.svg)
+[![codecov](https://codecov.io/gh/kaanaktas/go-slm/branch/main/graph/badge.svg)](https://codecov.io/gh/kaanaktas/go-slm)
+
 # go-slm
 
 go-slm is a policy-based service level management library that enforces policy requirements as per service. Different policy rules can be combined 
