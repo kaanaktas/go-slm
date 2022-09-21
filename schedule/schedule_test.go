@@ -2,6 +2,7 @@ package schedule
 
 import (
 	"github.com/kaanaktas/go-slm/cache"
+	"github.com/kaanaktas/go-slm/policy"
 	"strconv"
 	"testing"
 	"time"
@@ -104,22 +105,36 @@ func TestLoad(t *testing.T) {
 		args args
 	}{
 		{
-			name: "weekdays_schedule",
+			name: "weekend_schedule",
 			args: args{
 				scheduleName: "weekend",
 				daysSize:     2,
 			},
 		},
 		{
-			name: "weekend_schedule",
+			name: "weekdays_schedule",
 			args: args{
-				scheduleName: "weekdays",
+				scheduleName: "weekdays_between_8_18",
 				daysSize:     5,
+			},
+		},
+		{
+			name: "weekdays_schedule_all_day",
+			args: args{
+				scheduleName: "weekdays_all_day",
+				daysSize:     5,
+			},
+		},
+		{
+			name: "no_days_match",
+			args: args{
+				scheduleName: "no_days_match",
+				daysSize:     0,
 			},
 		},
 	}
 
-	expectedCacheSize := 2
+	expectedCacheSize := 4
 
 	if cachedData, ok := cacheIn.Get(key); ok {
 		scheduleCache := cachedData.([]schedule)
@@ -144,5 +159,57 @@ func TestLoad(t *testing.T) {
 		}
 	} else {
 		t.Error("schedule Statements is not in the cache")
+	}
+}
+
+func TestExecutor_Apply(t *testing.T) {
+	cacheIn := cache.NewInMemory()
+	cacheIn.Flush()
+
+	Load("/testdata/schedule.yaml")
+
+	type fields struct {
+		Actions []policy.Action
+	}
+	tests := []struct {
+		name   string
+		panic  bool
+		fields fields
+	}{
+		{
+			name:  "test_schedule_not_permitted",
+			panic: true,
+			fields: fields{Actions: []policy.Action{
+				{Name: "weekdays_all_day", Active: true, Order: 10},
+			}}},
+		{
+			name:  "test_schedule_not_active",
+			panic: false,
+			fields: fields{Actions: []policy.Action{
+				{Name: "weekdays_all_day", Active: false, Order: 10},
+			}}},
+		{
+			name:  "empty_schedule",
+			panic: false,
+			fields: fields{Actions: []policy.Action{
+				{Name: "no_days_match", Active: true, Order: 10},
+			}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				r := recover()
+				if (r != nil) && tt.panic == false {
+					t.Errorf("%s did panic", tt.name)
+				} else if (r == nil) && tt.panic == true {
+					t.Errorf("%s didn't panic", tt.name)
+				}
+			}()
+
+			e := &Executor{
+				Actions: tt.fields.Actions,
+			}
+			e.Apply()
+		})
 	}
 }
