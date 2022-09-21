@@ -1,4 +1,4 @@
-
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 ![go-slm](https://github.com/kaanaktas/go-slm/workflows/go-slm/badge.svg)
 [![coverage](https://codecov.io/gh/kaanaktas/go-slm/branch/main/graph/badge.svg)](https://codecov.io/gh/kaanaktas/go-slm)
 
