@@ -21,6 +21,7 @@ Installation
 
 Configuration
 -------------
+![](diagram.png)
 
 ## datafilter
 
@@ -126,7 +127,7 @@ the **GO_SLM_COMMON_POLICIES_PATH** environment variable as in the example below
 **common_policies.yaml**
 
 ```
- policy:
+- policy:
     name: combined_policy
     statement:
       - type: data
@@ -146,7 +147,26 @@ the **GO_SLM_COMMON_POLICIES_PATH** environment variable as in the example below
             order: 10
           - name: weekdays
             active: true
-            order: 20
+            order: 20	
+- policy:
+    name: pan_only_policy
+    statement:
+      - type: data
+        action:
+          - name: pan_process
+            active: true
+- policy:
+    name: combined_policy_no_schedule
+    statement:
+      - type: data
+        order: 100
+        action:
+          - name: xss
+            active: true
+          - name: pan_process
+            active: true
+          - name: sqli
+            active: true
 ```
 
 Below, you can see how policy based definitions are generated for our API services. Simply, our common policies that we create 
@@ -160,10 +180,10 @@ environment variable as in the example below.
 **policy_rule_set.yaml**
 
 ```
-- serviceName: test
+- serviceName: service_test
   request: combined_policy
   response: pan_only_policy
-- serviceName: test2
-  request: combined_policy
+- serviceName: service_test_2
+  request: combined_policy_no_schedule
   response: pan_only_policy
 ```
