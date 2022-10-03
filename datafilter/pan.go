@@ -9,7 +9,7 @@ type pan struct {
 	pattern
 }
 
-func (p pan) Validate(data *string) bool {
+func (p *pan) Validate(data *string) bool {
 	dataWithoutSpace := strings.ReplaceAll(*data, " ", "")
 	r := regexp.MustCompile(p.Rule)
 	matchList := r.FindAllString(dataWithoutSpace, -1)
@@ -20,12 +20,4 @@ func (p pan) Validate(data *string) bool {
 	}
 
 	return false
-}
-
-func (p pan) ToString() string {
-	return p.Name + " " + p.Message
-}
-
-func (p pan) Disable() bool {
-	return p.IsDisabled
 }

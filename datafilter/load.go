@@ -10,6 +10,12 @@ import (
 	"path/filepath"
 )
 
+//filter types
+const (
+	PAN   = "pan"
+	OWASP = "owasp"
+)
+
 type ruleSet struct {
 	Type  string  `yaml:"type"`
 	Rules []rules `yaml:"rules"`
@@ -44,11 +50,11 @@ func Load(dataFilterRuleSetPath string) {
 			switch set.Type {
 			case PAN:
 				for i, v := range patterns {
-					validateRule[i] = pan{pattern: v}
+					validateRule[i] = &pan{pattern: v}
 				}
 			case OWASP:
 				for i, v := range patterns {
-					validateRule[i] = owasp{pattern: v}
+					validateRule[i] = &owasp{pattern: v}
 				}
 			}
 			cacheIn.Set(rule.Name, validateRule, cache.NoExpiration)

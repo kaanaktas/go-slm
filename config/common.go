@@ -32,7 +32,7 @@ func MustReadFile(fileName string) []byte {
 	return content
 }
 
-func MustUnmarshalYaml(path string, content []byte, decodedContent interface{}) {
+func MustUnmarshalYaml(path string, content []byte, decodedContent any) {
 	err := yaml.Unmarshal(content, decodedContent)
 	if err != nil {
 		panic(fmt.Sprintf("Can't unmarshall the content of %s. Error: %s", path, err))

@@ -1,16 +1,12 @@
 package datafilter
 
+import "regexp"
+
 type Validate interface {
 	Validate(data *string) bool
 	ToString() string
 	Disable() bool
 }
-
-//filter types
-const (
-	PAN   = "pan"
-	OWASP = "owasp"
-)
 
 type pattern struct {
 	Name       string `json:"name"`
@@ -18,4 +14,17 @@ type pattern struct {
 	Sample     string `json:"sample"`
 	Message    string `json:"message"`
 	IsDisabled bool   `json:"disable"`
+}
+
+func (p *pattern) Validate(data *string) bool {
+	matched, _ := regexp.MatchString(p.Rule, *data)
+	return matched
+}
+
+func (p *pattern) ToString() string {
+	return p.Name + " " + p.Message
+}
+
+func (p *pattern) Disable() bool {
+	return p.IsDisabled
 }

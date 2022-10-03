@@ -5,8 +5,8 @@ import (
 )
 
 type Cache interface {
-	Get(k string) (interface{}, bool)
-	Set(k string, v interface{}, d time.Duration)
+	Get(k string) (any, bool)
+	Set(k string, v any, d time.Duration)
 	Flush()
 }
 
