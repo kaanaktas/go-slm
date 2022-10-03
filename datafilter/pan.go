@@ -1,20 +1,22 @@
 package datafilter
 
 import (
+	"math"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
 type pan struct {
-	pattern
+	patternValidator
 }
 
-func (p pan) Validate(data *string) bool {
+func (p *pan) Validate(data *string) bool {
 	dataWithoutSpace := strings.ReplaceAll(*data, " ", "")
 	r := regexp.MustCompile(p.Rule)
 	matchList := r.FindAllString(dataWithoutSpace, -1)
 	for _, v := range matchList {
-		if isValidPanNumber(v) {
+		if isValidPan(v) {
 			return true
 		}
 	}
@@ -22,10 +24,34 @@ func (p pan) Validate(data *string) bool {
 	return false
 }
 
-func (p pan) ToString() string {
-	return p.Name + " " + p.Message
-}
+func isValidPan(number string) bool {
+	clearText := strings.ReplaceAll(number, " ", "")
+	if _, err := strconv.ParseInt(clearText, 10, 64); err != nil {
+		return false
+	}
+	digits := strings.Split(clearText, "")
+	lengthOfString := len(digits)
 
-func (p pan) Disable() bool {
-	return p.IsDisabled
+	if lengthOfString < 2 {
+		return false
+	}
+
+	sum := 0
+	doubleChecker := false
+
+	for i := lengthOfString - 1; i > -1; i-- {
+		digit, _ := strconv.Atoi(digits[i])
+		if doubleChecker {
+			digit *= 2
+
+			if digit > 9 {
+				digit -= 9
+			}
+		}
+
+		sum += digit
+		doubleChecker = !doubleChecker
+	}
+
+	return math.Mod(float64(sum), 10) == 0
 }

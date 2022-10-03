@@ -10,11 +10,11 @@ type inMemory struct {
 	cache *gocache.Cache
 }
 
-func (i *inMemory) Get(k string) (interface{}, bool) {
+func (i *inMemory) Get(k string) (any, bool) {
 	return i.cache.Get(k)
 }
 
-func (i *inMemory) Set(k string, v interface{}, d time.Duration) {
+func (i *inMemory) Set(k string, v any, d time.Duration) {
 	i.cache.Set(k, v, d*time.Minute)
 }
 

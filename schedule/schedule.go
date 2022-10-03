@@ -36,7 +36,10 @@ func (e *Executor) Apply() {
 		panic("schedule doesn't exist in the cache")
 	}
 
-	schedules := cachedSchedule.([]schedule)
+	schedules, ok := cachedSchedule.([]schedule)
+	if !ok {
+		panic("cached value has invalid type")
+	}
 	sort.Slice(e.Actions, func(i, j int) bool {
 		return e.Actions[i].Order < e.Actions[j].Order
 	})
@@ -54,7 +57,7 @@ func (e *Executor) Apply() {
 	}
 }
 
-func Load(scheduleStatementPath string) {
+func LoadSchedules(scheduleStatementPath string) {
 	if scheduleStatementPath == "" {
 		panic("GO_SLM_SCHEDULE_STATEMENT_PATH hasn't been set")
 	}
@@ -67,7 +70,7 @@ func Load(scheduleStatementPath string) {
 
 func isScheduleMatchWithPolicy(sc schedule) bool {
 	if isScheduledDayActive(sc.Days) {
-		return isCurrentTimeInScheduledTime(generateStartTime(sc.Start), time.Duration(sc.Duration))
+		return isScheduledTime(generateStartTime(sc.Start), time.Duration(sc.Duration))
 	}
 	return false
 }
@@ -86,7 +89,7 @@ func isScheduledDayActive(days []string) bool {
 	return false
 }
 
-func isCurrentTimeInScheduledTime(startTime string, duration time.Duration) bool {
+func isScheduledTime(startTime string, duration time.Duration) bool {
 	start, err := time.ParseInLocation(timeLayout, startTime, time.Local)
 	if err != nil {
 		panic(fmt.Sprintf("Error during parsing the time %s", err))

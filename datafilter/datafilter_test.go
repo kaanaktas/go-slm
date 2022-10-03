@@ -7,7 +7,7 @@ import (
 )
 
 func TestExecuteDataFilter(t *testing.T) {
-	Load("")
+	LoadDataFilterRules("")
 
 	type args struct {
 		data        string
@@ -77,7 +77,7 @@ func TestExecuteDataFilter(t *testing.T) {
 func TestDataFilterRuleLoad(t *testing.T) {
 	cacheIn := cache.NewInMemory()
 	cacheIn.Flush()
-	Load("/testdata/custom_datafilter_rule_set.yaml")
+	LoadDataFilterRules("/testdata/custom_datafilter_rule_set.yaml")
 
 	type cachedDataFilterRule struct {
 		name string
@@ -117,9 +117,9 @@ func TestDataFilterRuleLoad(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if cachedData, ok := cacheIn.Get(test.policy.name); ok {
-				if len(cachedData.([]Validate)) != test.policy.size {
+				if len(cachedData.([]Validator)) != test.policy.size {
 					t.Errorf("cached data size doesn't match up. Expected: %d, got:%d", test.policy.size,
-						len(cachedData.([]Validate)))
+						len(cachedData.([]Validator)))
 				}
 			} else {
 				t.Errorf("%s is not in the cache", test.policy.name)

@@ -15,7 +15,7 @@ type Executor struct {
 
 func (e *Executor) Apply() {
 	breaker := make(chan string)
-	in := make(chan Validate)
+	in := make(chan Validator)
 	closeCh := make(chan struct{})
 
 	go processor(e.Actions, in, breaker)
@@ -30,21 +30,19 @@ func (e *Executor) Apply() {
 	log.Println("no match with datafilter rules")
 }
 
-func processor(actions []policy.Action, in chan<- Validate, breaker <-chan string) {
-	defer func() {
-		close(in)
-	}()
+func processor(actions []policy.Action, in chan<- Validator, breaker <-chan string) {
+	defer close(in)
 
 	for _, v := range actions {
 		if v.Active {
 			if rule, ok := cacheIn.Get(v.Name); ok {
-				processRule(rule.([]Validate), in, breaker)
+				processRule(rule.([]Validator), in, breaker)
 			}
 		}
 	}
 }
 
-func processRule(patterns []Validate, in chan<- Validate, breaker <-chan string) {
+func processRule(patterns []Validator, in chan<- Validator, breaker <-chan string) {
 	var wg sync.WaitGroup
 
 	for _, pattern := range patterns {
@@ -54,7 +52,7 @@ func processRule(patterns []Validate, in chan<- Validate, breaker <-chan string)
 		go func() {
 			defer wg.Done()
 
-			if !pattern.Disable() {
+			if !pattern.IsDisabled() {
 				select {
 				case <-breaker:
 					return
@@ -67,7 +65,7 @@ func processRule(patterns []Validate, in chan<- Validate, breaker <-chan string)
 	wg.Wait()
 }
 
-func validator(data *string, in <-chan Validate, closeCh chan<- struct{}, breaker chan<- string) {
+func validator(data *string, in <-chan Validator, closeCh chan<- struct{}, breaker chan<- string) {
 	defer func() {
 		close(closeCh)
 	}()
@@ -83,7 +81,7 @@ func validator(data *string, in <-chan Validate, closeCh chan<- struct{}, breake
 	wg.Wait()
 }
 
-func worker(wg *sync.WaitGroup, data *string, in <-chan Validate, breaker chan<- string) {
+func worker(wg *sync.WaitGroup, data *string, in <-chan Validator, breaker chan<- string) {
 	go func() {
 		defer wg.Done()
 

@@ -69,8 +69,8 @@ func Test_isCurrentTimeInScheduledTime(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := isCurrentTimeInScheduledTime(tt.args.startTime, tt.args.duration); got != tt.want {
-				t.Errorf("isCurrentTimeInScheduledTime() = %v, want %v", got, tt.want)
+			if got := isScheduledTime(tt.args.startTime, tt.args.duration); got != tt.want {
+				t.Errorf("isScheduledTime() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -94,7 +94,7 @@ func TestLoad(t *testing.T) {
 	cacheIn := cache.NewInMemory()
 	cacheIn.Flush()
 
-	Load("/testdata/schedule.yaml")
+	LoadSchedules("/testdata/schedule.yaml")
 
 	type args struct {
 		scheduleName string
@@ -166,7 +166,7 @@ func TestExecutor_Apply(t *testing.T) {
 	cacheIn := cache.NewInMemory()
 	cacheIn.Flush()
 
-	Load("/testdata/schedule.yaml")
+	LoadSchedules("/testdata/schedule.yaml")
 
 	type fields struct {
 		Actions []policy.Action

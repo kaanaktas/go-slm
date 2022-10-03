@@ -35,12 +35,12 @@ func loadSpecification() {
 		panic("root directory is empty or module is not imported")
 	}
 
-	schedule.Load(spec.SchedulePolicyPath)
-	datafilter.Load(spec.DataFilterRuleSetPath)
-	policy.Load(spec.PolicyRuleSetPath, spec.CommonRulesPath)
+	schedule.LoadSchedules(spec.SchedulePolicyPath)
+	datafilter.LoadDataFilterRules(spec.DataFilterRuleSetPath)
+	policy.LoadPolicies(spec.PolicyRuleSetPath, spec.CommonRulesPath)
 }
 
-var isConfigurationFlagSet = "isConfigurationFlagSet"
+const isConfigurationFlagSet = "isConfigurationFlagSet"
 
 func Apply(data, serviceName, direction string) {
 	if _, ok := cacheIn.Get(isConfigurationFlagSet); !ok {
@@ -48,7 +48,7 @@ func Apply(data, serviceName, direction string) {
 		cacheIn.Set(isConfigurationFlagSet, true, cache.NoExpiration)
 	}
 
-	cachedPolicy, ok := cacheIn.Get(policy.Key)
+	cachedPolicy, ok := cacheIn.Get(policy.CacheKey)
 	if !ok {
 		panic("policy doesn't exist in the cache")
 	}
@@ -56,7 +56,7 @@ func Apply(data, serviceName, direction string) {
 	dynamicPolicyKey := config.PolicyKey(serviceName, direction)
 	policyStatements := cachedPolicy.(policy.Statements)[dynamicPolicyKey]
 	if len(policyStatements) == 0 {
-		log.Println("No policy statements found for", serviceName)
+		log.Printf("No policy statements found for %s", serviceName)
 		return
 	}
 

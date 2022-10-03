@@ -8,7 +8,7 @@ import (
 	"sort"
 )
 
-const Key = "policy_rule"
+const CacheKey = "policy_rule"
 
 var cacheIn = cache.NewInMemory()
 
@@ -39,7 +39,7 @@ type policy struct {
 
 type Statements map[string][]statement
 
-func Load(policyRuleSetPath, commonRulesPath string) {
+func LoadPolicies(policyRuleSetPath, commonRulesPath string) {
 	if policyRuleSetPath == "" {
 		panic("GO_SLM_POLICY_RULE_SET_PATH hasn't been set")
 	}
@@ -48,14 +48,14 @@ func Load(policyRuleSetPath, commonRulesPath string) {
 	}
 
 	var policies []policy
-	unmarshalYamlAndPopulatePolicies(policyRuleSetPath, &policies)
+	readPolicies(policyRuleSetPath, &policies)
 
-	var retrievedCommonPolicies []commonPolicies
-	unmarshalYamlAndPopulateCommonPolicies(commonRulesPath, &retrievedCommonPolicies)
+	var commonPolicies []commonPolicies
+	readCommonPolicies(commonRulesPath, &commonPolicies)
 
 	statements := make(Statements)
 	for _, policy := range policies {
-		for _, rule := range retrievedCommonPolicies {
+		for _, rule := range commonPolicies {
 			if rule.Policy.Name == policy.Request {
 				populatePolicyRules(rule, statements, config.PolicyKey(policy.ServiceName, config.Request))
 			}
@@ -64,19 +64,19 @@ func Load(policyRuleSetPath, commonRulesPath string) {
 			}
 		}
 	}
-	cacheIn.Set(Key, statements, cache.NoExpiration)
+	cacheIn.Set(CacheKey, statements, cache.NoExpiration)
 
 	log.Println("common policies have been loaded successfully")
 }
 
-func unmarshalYamlAndPopulateCommonPolicies(commonRulesPath string, retrievedCommonPolicies *[]commonPolicies) {
-	content := config.MustReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
-	config.MustUnmarshalYaml(commonRulesPath, content, retrievedCommonPolicies)
-}
-
-func unmarshalYamlAndPopulatePolicies(policyRuleSetPath string, policies *[]policy) {
+func readPolicies(policyRuleSetPath string, policies *[]policy) {
 	content := config.MustReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
 	config.MustUnmarshalYaml(policyRuleSetPath, content, policies)
+}
+
+func readCommonPolicies(commonRulesPath string, retrievedCommonPolicies *[]commonPolicies) {
+	content := config.MustReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
+	config.MustUnmarshalYaml(commonRulesPath, content, retrievedCommonPolicies)
 }
 
 func populatePolicyRules(rule commonPolicies, policyRules Statements, policyRuleKey string) {

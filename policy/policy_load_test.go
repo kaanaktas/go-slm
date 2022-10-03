@@ -9,7 +9,7 @@ func TestPolicyLoad(t *testing.T) {
 	cacheIn := cache.NewInMemory()
 	cacheIn.Flush()
 
-	Load("/testdata/policy_rule_set.yaml", "/testdata/common_policies.yaml")
+	LoadPolicies("/testdata/policy_rule_set.yaml", "/testdata/common_policies.yaml")
 
 	type cachedPolicyRule struct {
 		name     string
