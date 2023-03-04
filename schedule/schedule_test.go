@@ -134,7 +134,7 @@ func TestLoad(t *testing.T) {
 		},
 	}
 
-	expectedCacheSize := 4
+	expectedCacheSize := 5
 
 	if cachedData, ok := cacheIn.Get(key); ok {
 		scheduleCache := cachedData.([]schedule)
@@ -180,7 +180,7 @@ func TestExecutor_Apply(t *testing.T) {
 			name:  "test_schedule_not_permitted",
 			panic: true,
 			fields: fields{Actions: []policy.Action{
-				{Name: "weekdays_all_day", Active: true, Order: 10},
+				{Name: "week_all_day", Active: true, Order: 10},
 			}}},
 		{
 			name:  "test_schedule_not_active",
@@ -210,6 +210,37 @@ func TestExecutor_Apply(t *testing.T) {
 				Actions: tt.fields.Actions,
 			}
 			e.Apply()
+		})
+	}
+}
+
+func TestIsScheduledDayActive(t *testing.T) {
+	tests := []struct {
+		name           string
+		days           []string
+		currentDayFunc func() string
+		want           bool
+	}{
+		{
+			name:           "Day is in the list",
+			days:           []string{"Monday", "Tuesday", "Wednesday"},
+			currentDayFunc: func() string { return "Tuesday" },
+			want:           true,
+		},
+		{
+			name:           "Day is not in the list",
+			days:           []string{"Monday", "Wednesday", "Friday"},
+			currentDayFunc: func() string { return "Tuesday" },
+			want:           false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isScheduledDayActive(tt.days, tt.currentDayFunc)
+			if got != tt.want {
+				t.Errorf("isScheduledDayActive() = %v, want %v", got, tt.want)
+			}
 		})
 	}
 }

@@ -68,19 +68,23 @@ func LoadSchedules(scheduleStatementPath string) {
 	cacheIn.Set(key, schedules, cache.NoExpiration)
 }
 
+func generateStartTime(start string) string {
+	return time.Now().Format(dateLayout) + "T" + start
+}
+
+func getCurrentDayOfTheWeek() string {
+	return time.Now().Weekday().String()
+}
+
 func isScheduleMatchWithPolicy(sc schedule) bool {
-	if isScheduledDayActive(sc.Days) {
+	if isScheduledDayActive(sc.Days, getCurrentDayOfTheWeek) {
 		return isScheduledTime(generateStartTime(sc.Start), time.Duration(sc.Duration))
 	}
 	return false
 }
 
-func generateStartTime(start string) string {
-	return time.Now().Format(dateLayout) + "T" + start
-}
-
-func isScheduledDayActive(days []string) bool {
-	dayOfTheWeek := time.Now().Weekday().String()
+func isScheduledDayActive(days []string, getCurrentDayOfTheWeek func() string) bool {
+	dayOfTheWeek := getCurrentDayOfTheWeek()
 	for _, day := range days {
 		if dayOfTheWeek == day {
 			return true

@@ -51,7 +51,7 @@ func LoadPolicies(policyRuleSetPath, commonRulesPath string) {
 	readPolicies(policyRuleSetPath, &policies)
 
 	var commonPolicies []commonPolicies
-	readCommonPolicies(commonRulesPath, &commonPolicies)
+	readPolicies(commonRulesPath, &commonPolicies)
 
 	statements := make(Statements)
 	for _, policy := range policies {
@@ -69,14 +69,9 @@ func LoadPolicies(policyRuleSetPath, commonRulesPath string) {
 	log.Println("common policies have been loaded successfully")
 }
 
-func readPolicies(policyRuleSetPath string, policies *[]policy) {
+func readPolicies[T any](policyRuleSetPath string, policies *T) {
 	content := config.MustReadFile(filepath.Join(config.RootDirectory, policyRuleSetPath))
 	config.MustUnmarshalYaml(policyRuleSetPath, content, policies)
-}
-
-func readCommonPolicies(commonRulesPath string, retrievedCommonPolicies *[]commonPolicies) {
-	content := config.MustReadFile(filepath.Join(config.RootDirectory, commonRulesPath))
-	config.MustUnmarshalYaml(commonRulesPath, content, retrievedCommonPolicies)
 }
 
 func populatePolicyRules(rule commonPolicies, policyRules Statements, policyRuleKey string) {

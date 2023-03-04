@@ -71,7 +71,7 @@ func createExecutor(data string, statementType string, actions []policy.Action) 
 	case config.StatementSchedule:
 		return &schedule.Executor{Actions: actions}
 	case config.StatementData:
-		return &datafilter.Executor{Actions: actions, Data: &data}
+		return &datafilter.Executor[datafilter.Validator]{Actions: actions, Data: &data}
 	default:
 		panic(fmt.Sprintf("StatementType: %s doesn't exist", statementType))
 	}

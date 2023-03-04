@@ -14,7 +14,7 @@
     - Friday
   start: 08:00:00
   duration: 600
-  message: The service is not permitted in the weekdays between 08:00 and 18:00
+  message: The service is not permitted on the weekdays between 08:00 and 18:00
 - scheduleName: weekdays_all_day
   days:
     - Monday
@@ -24,9 +24,21 @@
     - Friday
   start: 00:00:00
   duration: 1440
-  message: The service is not permitted in the weekdays
+  message: The service is not permitted on the weekdays
 - scheduleName: no_days_match
   days:
   start: 00:00:00
   duration: 1440
   message: The service is permitted
+- scheduleName: week_all_day
+  days:
+    - Monday
+    - Tuesday
+    - Wednesday
+    - Thursday
+    - Friday
+    - Saturday
+    - Sunday
+  start: 00:00:00
+  duration: 1440
+  message: The service is not permitted on any day of the week
