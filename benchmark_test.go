@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/kaanaktas/go-slm/config"
 	"github.com/kaanaktas/go-slm/executor"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"testing"
@@ -17,7 +17,7 @@ func init() {
 
 	log.Println("Starting with number of worker", config.NumberOfWorker)
 	log.SetFlags(0)
-	log.SetOutput(ioutil.Discard)
+	log.SetOutput(io.Discard)
 }
 
 func Benchmark(b *testing.B) {
@@ -27,6 +27,7 @@ func Benchmark(b *testing.B) {
 	data := string(content)
 	serviceName := "test3"
 
+	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		executor.Apply(data, serviceName, config.Request)
 	}

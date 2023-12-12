@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 )
 
-//filter types
+// filter types
 const (
 	PAN   = "pan"
 	OWASP = "owasp"
@@ -50,10 +50,12 @@ func LoadDataFilterRules(dataFilterRuleSetPath string) {
 			switch set.Type {
 			case PAN:
 				for i, v := range patterns {
+					v.compileRule()
 					validateRule[i] = &pan{patternValidator: v}
 				}
 			case OWASP:
 				for i, v := range patterns {
+					v.compileRule()
 					validateRule[i] = &owasp{patternValidator: v}
 				}
 			}

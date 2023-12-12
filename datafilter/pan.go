@@ -2,7 +2,6 @@ package datafilter
 
 import (
 	"math"
-	"regexp"
 	"strconv"
 	"strings"
 )
@@ -13,8 +12,7 @@ type pan struct {
 
 func (p *pan) Validate(data *string) bool {
 	dataWithoutSpace := strings.ReplaceAll(*data, " ", "")
-	r := regexp.MustCompile(p.Rule)
-	matchList := r.FindAllString(dataWithoutSpace, -1)
+	matchList := p.Regex.FindAllString(dataWithoutSpace, -1)
 	for _, v := range matchList {
 		if isValidPan(v) {
 			return true

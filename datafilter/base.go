@@ -14,17 +14,17 @@ type Validator interface {
 
 // PatternValidator represents a validation rule based on a regular expression patternValidator.
 type patternValidator struct {
-	Name    string `json:"name"`
-	Rule    string `json:"rule"`
-	Sample  string `json:"sample"`
-	Message string `json:"message"`
-	Disable bool   `json:"disable"`
+	Name    string         `yaml:"name"`
+	Regex   *regexp.Regexp `yaml:"-"`
+	Rule    string         `yaml:"rule"`
+	Sample  string         `yaml:"sample"`
+	Message string         `yaml:"message"`
+	Disable bool           `yaml:"disable"`
 }
 
 // Validate checks whether the given data string satisfies the regular expression pattern.
 func (pv *patternValidator) Validate(data *string) bool {
-	matched, _ := regexp.MatchString(pv.Rule, *data)
-	return matched
+	return pv.Regex.MatchString(*data)
 }
 
 // ToString returns a string representation of the validation rule.
@@ -35,4 +35,8 @@ func (pv *patternValidator) ToString() string {
 // IsDisabled indicates whether the validation rule is disabled.
 func (pv *patternValidator) IsDisabled() bool {
 	return pv.Disable
+}
+
+func (pv *patternValidator) compileRule() {
+	pv.Regex = regexp.MustCompile(pv.Rule)
 }
